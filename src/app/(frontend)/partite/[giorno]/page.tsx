@@ -11,7 +11,7 @@ import { ScoreLine } from '@/components/ui/ScoreLine'
 import { VoteChip } from '@/components/ui/VoteChip'
 import { getContesto, type Contesto } from '@/lib/data'
 import { formatGiornoBreve, formatGiornoEsteso, formatMedia, formatVoto, nomeVisualizzato } from '@/lib/format'
-import { migliorInCampo, type Id, type Lato, type Partita, type Riga } from '@/lib/stats'
+import { migliorInCampo, type Id, type Lato, type Partita, type Riga, type Ruolo } from '@/lib/stats'
 
 const GIORNO = /^\d{4}-\d{2}-\d{2}$/
 
@@ -40,9 +40,18 @@ export async function generateMetadata({ params }: PageProps<'/partite/[giorno]'
   }
 }
 
-/** Voto più alto in cima; senza voto in fondo; a parità chi ha segnato di più. */
-const ordinaPagella = (righe: Riga[]) =>
-  [...righe].sort((x, y) => (y.voto ?? -1) - (x.voto ?? -1) || y.gol - x.gol)
+const ORDINE_RUOLI: Ruolo[] = ['portiere', 'difensore', 'centrocampista', 'attaccante']
+
+/** Per ruolo, dal portiere agli attaccanti; nello stesso ruolo voto più alto in cima (senza voto in fondo), poi chi ha segnato di più. */
+const ordinaPagella = (righe: Riga[], giocatori: Contesto['giocatoriById']) => {
+  const ruolo = (r: Riga) => {
+    const g = giocatori.get(r.giocatoreId)
+    return g ? ORDINE_RUOLI.indexOf(g.ruolo) : ORDINE_RUOLI.length
+  }
+  return [...righe].sort(
+    (x, y) => ruolo(x) - ruolo(y) || (y.voto ?? -1) - (x.voto ?? -1) || y.gol - x.gol,
+  )
+}
 
 const mediaVoti = (righe: Riga[]) => {
   const voti = righe.map((r) => r.voto).filter((v): v is number => v !== null)
@@ -79,7 +88,7 @@ function Pagella({
 
       {righe.length ? (
         <ul className="flex flex-col">
-          {ordinaPagella(righe).map((r) => {
+          {ordinaPagella(righe, ctx.giocatoriById).map((r) => {
             const g = ctx.giocatoriById.get(r.giocatoreId)
             if (!g) return null
             const mvp = r.giocatoreId === migliore
