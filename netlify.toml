@@ -1,0 +1,9 @@
+[build]
+  # Applica le migrazioni su Turso, poi builda. Sovrascrive il comando impostato nella UI di Netlify.
+  command = "pnpm build:deploy"
+
+[build.environment]
+  # La cache persistente di Turbopack salva i valori delle env (es. PAYLOAD_SECRET) per invalidarsi
+  # quando cambiano. È la cache di build che Netlify conserva tra un deploy e l'altro: non viene
+  # pubblicata. L'output pubblicato resta comunque sotto scansione.
+  SECRETS_SCAN_OMIT_PATHS = ".netlify/.next/cache,.next/cache"
