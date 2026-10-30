@@ -3,6 +3,7 @@ import { Barlow_Condensed, Inter } from 'next/font/google'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
+import { RegistraServiceWorker } from '@/components/pwa/RegistraServiceWorker'
 import { NavLinks } from '@/components/layout/NavLinks'
 import { SeasonSelect } from '@/components/layout/SeasonSelect'
 import { getContesto, TUTTE_LE_STAGIONI } from '@/lib/data'
@@ -26,6 +27,7 @@ const barlow = Barlow_Condensed({
 export const metadata: Metadata = {
   title: { default: 'Partita del lunedì', template: '%s · Partita del lunedì' },
   description: 'Risultati, marcatori e pagelle della partita del lunedì.',
+  appleWebApp: { capable: true, title: 'Partita', statusBarStyle: 'black' },
 }
 
 export const viewport: Viewport = {
@@ -41,6 +43,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
   return (
     <html lang="it" className={`${inter.variable} ${barlow.variable}`}>
       <body className="min-h-dvh">
+        <RegistraServiceWorker />
         <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-[1100px] items-center justify-between gap-4 px-4 lg:h-16">
             <Link href="/" className="flex min-h-11 items-center gap-2">

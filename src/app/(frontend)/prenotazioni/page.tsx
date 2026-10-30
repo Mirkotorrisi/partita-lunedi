@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 
 import { AreaGiocatore, type Io } from '@/components/prenotazioni/AreaGiocatore'
+import { InstallaApp } from '@/components/pwa/InstallaApp'
 import { ListaIscritti, type Iscritto } from '@/components/prenotazioni/ListaIscritti'
 import { getContesto } from '@/lib/data'
 import { formatGiornoEsteso, nomeCompleto } from '@/lib/format'
@@ -59,6 +60,7 @@ export default async function PrenotazioniPage() {
       </header>
 
       <AreaGiocatore io={io} giocatori={scelta} />
+      <InstallaApp />
 
       <section aria-labelledby="lista" className="flex flex-col gap-3">
         <h2 id="lista" className="label">

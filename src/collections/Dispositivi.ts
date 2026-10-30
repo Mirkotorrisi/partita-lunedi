@@ -36,6 +36,12 @@ export const Dispositivi: CollectionConfig = {
       admin: { readOnly: true, position: 'sidebar' },
     },
     {
+      name: 'pushSubscription',
+      label: 'Sottoscrizione notifiche',
+      type: 'json',
+      admin: { readOnly: true, position: 'sidebar', description: 'Presente se il giocatore ha attivato le notifiche.' },
+    },
+    {
       name: 'fingerprint',
       label: 'Fingerprint del browser',
       type: 'text',

@@ -177,3 +177,31 @@ async function segnaAccesso(id: number) {
   const payload = await getPayload({ config })
   await payload.update({ collection: 'dispositivi', id, data: { ultimoAccesso: new Date().toISOString() } })
 }
+
+/** Sottoscrizione push di questo dispositivo (deve già essere associato a un giocatore). */
+export async function salvaPush(sub: { endpoint: string; keys: { p256dh: string; auth: string } }): Promise<Esito> {
+  const dispositivo = await dispositivoCorrente()
+  if (!dispositivo) return { ok: false, errore: ERRORE_DISPOSITIVO }
+  const valida =
+    typeof sub?.endpoint === 'string' &&
+    sub.endpoint.startsWith('https://') &&
+    typeof sub.keys?.p256dh === 'string' &&
+    typeof sub.keys?.auth === 'string'
+  if (!valida) return { ok: false, errore: 'Sottoscrizione non valida' }
+
+  const payload = await getPayload({ config })
+  await payload.update({
+    collection: 'dispositivi',
+    id: dispositivo.id,
+    data: { pushSubscription: { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } } },
+  })
+  return { ok: true }
+}
+
+export async function rimuoviPush(): Promise<Esito> {
+  const dispositivo = await dispositivoCorrente()
+  if (!dispositivo) return { ok: false, errore: ERRORE_DISPOSITIVO }
+  const payload = await getPayload({ config })
+  await payload.update({ collection: 'dispositivi', id: dispositivo.id, data: { pushSubscription: null } })
+  return { ok: true }
+}

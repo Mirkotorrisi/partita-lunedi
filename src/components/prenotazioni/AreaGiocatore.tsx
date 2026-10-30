@@ -4,6 +4,7 @@ import { Check, LogOut, Search, UserRoundCheck } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 
 import { aggiornaProfilo, annulla, associa, prenota, riconosci, scollega } from '@/app/(frontend)/prenotazioni/actions'
+import { NotificheToggle } from '@/components/pwa/NotificheToggle'
 import { calcolaFingerprint } from '@/lib/fingerprint'
 
 export interface GiocatoreScelta {
@@ -232,7 +233,8 @@ function Prenotazione({ io }: { io: Io }) {
             {salvato && <span className="text-sm text-win">Salvato</span>}
           </div>
         </form>
-        <div className="mt-4 border-t border-border pt-3">
+        <div className="mt-4 flex flex-col border-t border-border pt-3">
+          <NotificheToggle />
           <button className="inline-flex min-h-11 items-center gap-2 text-sm text-muted hover:text-text" disabled={pending} onClick={() => esegui(scollega)}>
             <LogOut className="h-4 w-4" aria-hidden="true" /> Non sono {io.soprannome || io.nome}
           </button>

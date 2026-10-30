@@ -294,6 +294,18 @@ export interface Dispositivi {
   ultimoAccesso?: string | null;
   tokenHash: string;
   /**
+   * Presente se il giocatore ha attivato le notifiche.
+   */
+  pushSubscription?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
    * Serve a riconoscere il dispositivo se il cookie viene cancellato.
    */
   fingerprint?: string | null;
@@ -502,6 +514,7 @@ export interface DispositiviSelect<T extends boolean = true> {
   etichetta?: T;
   ultimoAccesso?: T;
   tokenHash?: T;
+  pushSubscription?: T;
   fingerprint?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -629,6 +642,10 @@ export interface ProssimaPartita {
    * Nome o indirizzo del campo.
    */
   campo?: string | null;
+  /**
+   * Scrivi un messaggio e salva: arriva subito a chi ha attivato le notifiche (es. "Si gioca alle 21:30"). Il campo si svuota dopo l’invio.
+   */
+  notifica?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -640,6 +657,7 @@ export interface ProssimaPartitaSelect<T extends boolean = true> {
   giorno?: T;
   ora?: T;
   campo?: T;
+  notifica?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
