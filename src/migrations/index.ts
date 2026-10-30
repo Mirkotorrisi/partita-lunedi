@@ -3,6 +3,7 @@ import * as migration_20261007_154713_add_numero_maglia from './20261007_154713_
 import * as migration_20261030_094718_add_prenotazioni from './20261030_094718_add_prenotazioni';
 import * as migration_20261030_095550_add_prossima_partita from './20261030_095550_add_prossima_partita';
 import * as migration_20261030_114700_add_push from './20261030_114700_add_push';
+import * as migration_20261030_123736_add_cloud_storage from './20261030_123736_add_cloud_storage';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20261030_114700_add_push.up,
     down: migration_20261030_114700_add_push.down,
-    name: '20261030_114700_add_push'
+    name: '20261030_114700_add_push',
+  },
+  {
+    up: migration_20261030_123736_add_cloud_storage.up,
+    down: migration_20261030_123736_add_cloud_storage.down,
+    name: '20261030_123736_add_cloud_storage'
   },
 ];

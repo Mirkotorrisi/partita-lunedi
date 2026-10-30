@@ -205,3 +205,53 @@ export async function rimuoviPush(): Promise<Esito> {
   await payload.update({ collection: 'dispositivi', id: dispositivo.id, data: { pushSubscription: null } })
   return { ok: true }
 }
+
+const FOTO_MAX_BYTE = 1024 * 1024
+
+/** Foto profilo: arriva già ridimensionata dal browser, qui si valida e si salva. */
+export async function caricaFoto(formData: FormData): Promise<Esito> {
+  const dispositivo = await dispositivoCorrente()
+  const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
+  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+
+  const file = formData.get('foto')
+  if (!(file instanceof File) || file.size === 0) return { ok: false, errore: 'Nessuna foto selezionata' }
+  if (file.size > FOTO_MAX_BYTE) return { ok: false, errore: 'La foto è troppo grande' }
+  if (file.type !== 'image/jpeg') return { ok: false, errore: 'Formato non supportato' }
+
+  const payload = await getPayload({ config })
+  const giocatore = await payload.findByID({ collection: 'giocatori', id: giocatoreId, depth: 0 })
+  const precedente = relId(giocatore.foto)
+
+  const media = await payload.create({
+    collection: 'media',
+    data: { alt: `Foto di ${giocatore.nomeCompleto}` },
+    file: {
+      data: Buffer.from(await file.arrayBuffer()),
+      mimetype: 'image/jpeg',
+      name: `${giocatore.slug ?? giocatoreId}-${Date.now()}.jpg`,
+      size: file.size,
+    },
+  })
+  await payload.update({ collection: 'giocatori', id: giocatoreId, data: { foto: media.id } })
+  // La vecchia foto non serve più: si elimina per non accumulare file.
+  if (precedente !== undefined) await payload.delete({ collection: 'media', id: precedente }).catch(() => undefined)
+
+  await segnaAccesso(dispositivo.id)
+  aggiorna()
+  return { ok: true }
+}
+
+export async function rimuoviFoto(): Promise<Esito> {
+  const dispositivo = await dispositivoCorrente()
+  const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
+  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+
+  const payload = await getPayload({ config })
+  const giocatore = await payload.findByID({ collection: 'giocatori', id: giocatoreId, depth: 0 })
+  const precedente = relId(giocatore.foto)
+  await payload.update({ collection: 'giocatori', id: giocatoreId, data: { foto: null } })
+  if (precedente !== undefined) await payload.delete({ collection: 'media', id: precedente }).catch(() => undefined)
+  aggiorna()
+  return { ok: true }
+}

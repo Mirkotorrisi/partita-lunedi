@@ -41,6 +41,7 @@ export default async function PrenotazioniPage() {
           soprannome: me.soprannome,
           numeroMaglia: me.numeroMaglia,
           iscritto: iscritti.some((i) => i.giocatore.id === me.id),
+          anagrafica: { nome: me.nome, cognome: me.cognome, fotoUrl: me.fotoUrl },
         }
       : null
 

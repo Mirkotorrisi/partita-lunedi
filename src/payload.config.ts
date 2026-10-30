@@ -1,5 +1,5 @@
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { it } from '@payloadcms/translations/languages/it'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -14,6 +14,7 @@ import { Partite } from './collections/Partite'
 import { Squadre } from './collections/Squadre'
 import { Users } from './collections/Users'
 import { ProssimaPartita } from './globals/ProssimaPartita'
+import { cloudinaryAdapter, cloudinaryAttivo, cloudinaryUrl } from './plugins/cloudinaryAdapter'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -54,11 +55,19 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
-    // Senza token (sviluppo locale) le immagini vanno su filesystem in ./media.
-    vercelBlobStorage({
-      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
-      collections: { media: true },
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+    // Senza credenziali Cloudinary (sviluppo locale) le immagini vanno su filesystem in ./media.
+    cloudStoragePlugin({
+      enabled: cloudinaryAttivo(),
+      // Stesso schema con o senza Cloudinary: la colonna aggiunta dal plugin esiste anche in locale.
+      alwaysInsertFields: true,
+      collections: {
+        media: {
+          adapter: cloudinaryAdapter,
+          disableLocalStorage: true,
+          // Con il plugin spento Payload usa i propri URL (/api/media/file/…).
+          generateFileURL: cloudinaryAttivo() ? ({ filename }) => cloudinaryUrl(filename) : undefined,
+        },
+      },
     }),
   ],
 })

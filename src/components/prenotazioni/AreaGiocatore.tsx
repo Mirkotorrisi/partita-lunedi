@@ -4,8 +4,10 @@ import { Check, LogOut, Search, UserRoundCheck } from 'lucide-react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 
 import { aggiornaProfilo, annulla, associa, prenota, riconosci, scollega } from '@/app/(frontend)/prenotazioni/actions'
+import { FotoProfilo } from '@/components/prenotazioni/FotoProfilo'
 import { NotificheToggle } from '@/components/pwa/NotificheToggle'
 import { calcolaFingerprint } from '@/lib/fingerprint'
+import type { Giocatore } from '@/lib/stats'
 
 export interface GiocatoreScelta {
   id: number
@@ -16,6 +18,7 @@ export interface GiocatoreScelta {
 export interface Io extends GiocatoreScelta {
   numeroMaglia: number | null
   iscritto: boolean
+  anagrafica: Pick<Giocatore, 'nome' | 'cognome' | 'fotoUrl'>
 }
 
 const BTN = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold disabled:opacity-50'
@@ -191,8 +194,11 @@ function Prenotazione({ io }: { io: Io }) {
           Il mio profilo
           <span className="text-xs text-muted">soprannome e maglia</span>
         </summary>
+        <div className="mt-3">
+          <FotoProfilo giocatore={io.anagrafica} />
+        </div>
         <form
-          className="mt-3 flex flex-col gap-3"
+          className="mt-4 flex flex-col gap-3"
           onSubmit={(e) => {
             e.preventDefault()
             salva()
