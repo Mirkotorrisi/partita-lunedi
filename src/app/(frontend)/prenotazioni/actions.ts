@@ -1,0 +1,179 @@
+'use server'
+
+import config from '@payload-config'
+import { randomBytes } from 'crypto'
+import { cookies, headers } from 'next/headers'
+import { revalidatePath } from 'next/cache'
+import { getPayload } from 'payload'
+
+import {
+  COOKIE_DISPOSITIVO,
+  DURATA_COOKIE,
+  dispositivoCorrente,
+  etichettaDa,
+  giornoPrenotazioni,
+  hashToken,
+} from '@/lib/prenotazioni'
+import { relId } from '@/lib/relations'
+
+type Esito = { ok: true } | { ok: false; errore: string }
+export type Riconoscimento =
+  | { stato: 'noto' }
+  | { stato: 'suggerito'; giocatoreId: number; nome: string }
+  | { stato: 'sconosciuto' }
+
+const FINGERPRINT = /^[a-f0-9]{64}$/
+const SOPRANNOME_MAX = 30
+const ERRORE_DISPOSITIVO = 'Dispositivo non riconosciuto: selezionati di nuovo dalla lista.'
+
+const aggiorna = () => revalidatePath('/prenotazioni')
+
+/**
+ * Il cookie è il riconoscimento principale. Se manca (cancellato) si prova con il fingerprint:
+ * poiché telefoni identici possono produrre lo stesso fingerprint, un match NON identifica da solo,
+ * ma viene solo proposto al giocatore, che deve confermare.
+ */
+export async function riconosci(fingerprint: string): Promise<Riconoscimento> {
+  if (await dispositivoCorrente()) return { stato: 'noto' }
+  if (!FINGERPRINT.test(fingerprint)) return { stato: 'sconosciuto' }
+
+  const payload = await getPayload({ config })
+  const { docs } = await payload.find({
+    collection: 'dispositivi',
+    where: { fingerprint: { equals: fingerprint } },
+    depth: 1,
+    pagination: false,
+  })
+  const giocatori = new Map(docs.flatMap((d) => (typeof d.giocatore === 'object' ? [[d.giocatore.id, d.giocatore]] : [])))
+  if (giocatori.size !== 1) return { stato: 'sconosciuto' }
+  const [giocatore] = giocatori.values()
+  return { stato: 'suggerito', giocatoreId: giocatore.id, nome: giocatore.soprannome || giocatore.nomeCompleto || '' }
+}
+
+/** Associa il browser a un giocatore e imposta il cookie. Più dispositivi per giocatore sono ammessi. */
+export async function associa(giocatoreId: number, fingerprint: string): Promise<Esito> {
+  if (!Number.isInteger(giocatoreId)) return { ok: false, errore: 'Giocatore non valido' }
+  const payload = await getPayload({ config })
+  const giocatore = await payload.findByID({ collection: 'giocatori', id: giocatoreId, depth: 0 }).catch(() => null)
+  if (!giocatore || !giocatore.attivo) return { ok: false, errore: 'Giocatore non valido' }
+
+  const token = randomBytes(32).toString('base64url')
+  const fp = FINGERPRINT.test(fingerprint) ? fingerprint : null
+  const dati = {
+    giocatore: giocatoreId,
+    tokenHash: hashToken(token),
+    fingerprint: fp,
+    etichetta: etichettaDa((await headers()).get('user-agent')),
+    ultimoAccesso: new Date().toISOString(),
+  }
+
+  // Stesso browser che si ri-associa (cookie perso): si ruota il token invece di duplicare il dispositivo.
+  const esistente = fp
+    ? (
+        await payload.find({
+          collection: 'dispositivi',
+          where: { and: [{ fingerprint: { equals: fp } }, { giocatore: { equals: giocatoreId } }] },
+          depth: 0,
+          limit: 1,
+        })
+      ).docs[0]
+    : undefined
+  if (esistente) await payload.update({ collection: 'dispositivi', id: esistente.id, data: dati })
+  else await payload.create({ collection: 'dispositivi', data: dati })
+
+  ;(await cookies()).set(COOKIE_DISPOSITIVO, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: DURATA_COOKIE,
+    path: '/',
+  })
+  aggiorna()
+  return { ok: true }
+}
+
+/** "Non sono io": scollega questo browser (il dispositivo viene eliminato). */
+export async function scollega(): Promise<Esito> {
+  const dispositivo = await dispositivoCorrente()
+  if (dispositivo) {
+    const payload = await getPayload({ config })
+    await payload.delete({ collection: 'dispositivi', id: dispositivo.id })
+  }
+  ;(await cookies()).delete(COOKIE_DISPOSITIVO)
+  aggiorna()
+  return { ok: true }
+}
+
+export async function prenota(): Promise<Esito> {
+  const dispositivo = await dispositivoCorrente()
+  const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
+  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+
+  const payload = await getPayload({ config })
+  const giorno = await giornoPrenotazioni()
+  const { totalDocs } = await payload.count({
+    collection: 'iscrizioni',
+    where: { and: [{ giorno: { equals: giorno } }, { giocatore: { equals: giocatoreId } }] },
+  })
+  // Idempotente: un doppio tap non crea una seconda riga né sposta l'orario.
+  if (totalDocs === 0) {
+    try {
+      await payload.create({ collection: 'iscrizioni', data: { giorno, giocatore: giocatoreId } })
+    } catch (err) {
+      // Doppio invio in parallelo: l'indice unico ha già garantito una sola riga.
+      const gia = await payload.count({
+        collection: 'iscrizioni',
+        where: { and: [{ giorno: { equals: giorno } }, { giocatore: { equals: giocatoreId } }] },
+      })
+      if (gia.totalDocs === 0) throw err
+    }
+  }
+  await segnaAccesso(dispositivo.id)
+  aggiorna()
+  return { ok: true }
+}
+
+export async function annulla(): Promise<Esito> {
+  const dispositivo = await dispositivoCorrente()
+  const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
+  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+
+  const payload = await getPayload({ config })
+  await payload.delete({
+    collection: 'iscrizioni',
+    where: { and: [{ giorno: { equals: await giornoPrenotazioni() } }, { giocatore: { equals: giocatoreId } }] },
+  })
+  aggiorna()
+  return { ok: true }
+}
+
+/** Soprannome e numero di maglia: gli unici campi che il giocatore può modificare da solo. */
+export async function aggiornaProfilo(input: { soprannome: string; numeroMaglia: number | null }): Promise<Esito> {
+  const dispositivo = await dispositivoCorrente()
+  const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
+  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+
+  const soprannome = String(input.soprannome ?? '').trim().replace(/\s+/g, ' ')
+  if (soprannome.length > SOPRANNOME_MAX) {
+    return { ok: false, errore: `Il soprannome può avere al massimo ${SOPRANNOME_MAX} caratteri` }
+  }
+  const numero = input.numeroMaglia
+  if (numero !== null && (!Number.isInteger(numero) || numero < 1 || numero > 99)) {
+    return { ok: false, errore: 'Il numero di maglia deve essere tra 1 e 99' }
+  }
+
+  const payload = await getPayload({ config })
+  await payload.update({
+    collection: 'giocatori',
+    id: giocatoreId,
+    data: { soprannome: soprannome || null, numeroMaglia: numero },
+  })
+  await segnaAccesso(dispositivo.id)
+  aggiorna()
+  return { ok: true }
+}
+
+async function segnaAccesso(id: number) {
+  const payload = await getPayload({ config })
+  await payload.update({ collection: 'dispositivi', id, data: { ultimoAccesso: new Date().toISOString() } })
+}

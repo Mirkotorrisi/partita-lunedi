@@ -68,8 +68,10 @@ export interface Config {
   blocks: {};
   collections: {
     partite: Partite;
+    iscrizioni: Iscrizioni;
     giocatori: Giocatori;
     squadre: Squadre;
+    dispositivi: Dispositivi;
     media: Media;
     users: User;
     'payload-kv': PayloadKv;
@@ -80,8 +82,10 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     partite: PartiteSelect<false> | PartiteSelect<true>;
+    iscrizioni: IscrizioniSelect<false> | IscrizioniSelect<true>;
     giocatori: GiocatoriSelect<false> | GiocatoriSelect<true>;
     squadre: SquadreSelect<false> | SquadreSelect<true>;
+    dispositivi: DispositiviSelect<false> | DispositiviSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -93,8 +97,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'prossima-partita': ProssimaPartita;
+  };
+  globalsSelect: {
+    'prossima-partita': ProssimaPartitaSelect<false> | ProssimaPartitaSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -257,6 +265,43 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "iscrizioni".
+ */
+export interface Iscrizioni {
+  id: number;
+  /**
+   * YYYY-MM-DD, come il giorno delle partite.
+   */
+  giorno: string;
+  giocatore: number | Giocatori;
+  /**
+   * Di default la squadra abituale del giocatore. Cambiala per i prestiti: è quella che finisce nella formazione.
+   */
+  squadra?: (number | null) | Squadre;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Eliminare un dispositivo lo scollega dal giocatore: alla prossima visita dovrà selezionarsi di nuovo.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dispositivi".
+ */
+export interface Dispositivi {
+  id: number;
+  giocatore: number | Giocatori;
+  etichetta?: string | null;
+  ultimoAccesso?: string | null;
+  tokenHash: string;
+  /**
+   * Serve a riconoscere il dispositivo se il cookie viene cancellato.
+   */
+  fingerprint?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -310,12 +355,20 @@ export interface PayloadLockedDocument {
         value: number | Partite;
       } | null)
     | ({
+        relationTo: 'iscrizioni';
+        value: number | Iscrizioni;
+      } | null)
+    | ({
         relationTo: 'giocatori';
         value: number | Giocatori;
       } | null)
     | ({
         relationTo: 'squadre';
         value: number | Squadre;
+      } | null)
+    | ({
+        relationTo: 'dispositivi';
+        value: number | Dispositivi;
       } | null)
     | ({
         relationTo: 'media';
@@ -403,6 +456,17 @@ export interface PartiteSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "iscrizioni_select".
+ */
+export interface IscrizioniSelect<T extends boolean = true> {
+  giorno?: T;
+  giocatore?: T;
+  squadra?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "giocatori_select".
  */
 export interface GiocatoriSelect<T extends boolean = true> {
@@ -426,6 +490,19 @@ export interface GiocatoriSelect<T extends boolean = true> {
 export interface SquadreSelect<T extends boolean = true> {
   nome?: T;
   colore?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dispositivi_select".
+ */
+export interface DispositiviSelect<T extends boolean = true> {
+  giocatore?: T;
+  etichetta?: T;
+  ultimoAccesso?: T;
+  tokenHash?: T;
+  fingerprint?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -533,6 +610,39 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prossima-partita".
+ */
+export interface ProssimaPartita {
+  id: number;
+  /**
+   * Lascia vuoto per il prossimo lunedì. Se è una data passata viene ignorata.
+   */
+  giorno?: string | null;
+  /**
+   * Es. 21:00
+   */
+  ora?: string | null;
+  /**
+   * Nome o indirizzo del campo.
+   */
+  campo?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prossima-partita_select".
+ */
+export interface ProssimaPartitaSelect<T extends boolean = true> {
+  giorno?: T;
+  ora?: T;
+  campo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

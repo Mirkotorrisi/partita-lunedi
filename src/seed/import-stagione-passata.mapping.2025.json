@@ -1,0 +1,473 @@
+{
+  "teamNameNeri": "Neri",
+  "teamNameRossi": "Rossi",
+  "teamColorNeri": "#000000",
+  "teamColorRossi": "#dc2626",
+  "colorAliases": {
+    "NERI": "neri",
+    "VERDI": "rossi"
+  },
+  "dateAliases": {
+    "29/7": "29/9"
+  },
+  "playerAliases": {
+    "Andrea 🌹": "Andrea Rosa",
+    "Andrea Rosa": "Andrea Rosa",
+    "Biuzzo": "Biuzzo",
+    "Brioscina": "Ciccio Brioscina",
+    "Claudio": "Claudio Serra",
+    "Danilo Nino": "Danilo Nino",
+    "Gabriele": "Gabriele Simona",
+    "Giancarlo": "Giancarlo Corsaro",
+    "Kevin": "Kevin Squillaci",
+    "Lo turco": "Lo Turco",
+    "Manuel": "Manuel Torrisi",
+    "Mirko": "Mirko Torrisi",
+    "Saverio": "Saverio Frandina",
+    "Seby": "Seby Finocchiaro",
+    "Umile": "Salvo L'Umile"
+  },
+  "players": {
+    "Andrea Rabuazzo": {
+      "nome": "Andrea",
+      "cognome": "Rabuazzo",
+      "ruolo": "difensore"
+    },
+    "Andrea Rosa": {
+      "nome": "Andrea",
+      "cognome": "Rosa",
+      "ruolo": "difensore"
+    },
+    "Biuzzo": {
+      "nome": "Biuzzo",
+      "cognome": "Sconosciuto",
+      "ruolo": "difensore"
+    },
+    "Ciccio Brioscina": {
+      "nome": "Ciccio",
+      "cognome": "Brioscina",
+      "ruolo": "difensore"
+    },
+    "Claudio Serra": {
+      "nome": "Claudio",
+      "cognome": "Serra",
+      "ruolo": "difensore"
+    },
+    "Costa": {
+      "nome": "Costa",
+      "cognome": "Sconosciuto",
+      "ruolo": "difensore"
+    },
+    "Danilo Jamaicano": {
+      "nome": "Danilo",
+      "cognome": "Jamaicano",
+      "ruolo": "difensore"
+    },
+    "Danilo Nino": {
+      "nome": "Danilo",
+      "cognome": "Nino",
+      "ruolo": "difensore"
+    },
+    "Dennis Squillaci": {
+      "nome": "Dennis",
+      "cognome": "Squillaci",
+      "ruolo": "difensore"
+    },
+    "Fabrizio Di Caro": {
+      "nome": "Fabrizio",
+      "cognome": "Di Caro",
+      "ruolo": "difensore"
+    },
+    "Gabriele Simona": {
+      "nome": "Gabriele",
+      "cognome": "Simona",
+      "ruolo": "difensore"
+    },
+    "Giancarlo Corsaro": {
+      "nome": "Giancarlo",
+      "cognome": "Corsaro",
+      "ruolo": "difensore"
+    },
+    "Gianluca Lo Turco": {
+      "nome": "Gianluca",
+      "cognome": "Lo Turco",
+      "ruolo": "difensore"
+    },
+    "Giorgio": {
+      "nome": "Giorgio",
+      "cognome": "Sconosciuto",
+      "ruolo": "difensore"
+    },
+    "Gost": {
+      "nome": "Gost",
+      "cognome": "Sconosciuto",
+      "ruolo": "difensore"
+    },
+    "Graziano P": {
+      "nome": "Graziano",
+      "cognome": "P",
+      "ruolo": "difensore"
+    },
+    "Graziano Santangelo": {
+      "nome": "Graziano",
+      "cognome": "Santangelo",
+      "ruolo": "difensore"
+    },
+    "Haichel": {
+      "nome": "Haichel",
+      "cognome": "Sconosciuto",
+      "ruolo": "difensore"
+    },
+    "Iacopo Sarvà": {
+      "nome": "Iacopo",
+      "cognome": "Sarvà",
+      "ruolo": "difensore"
+    },
+    "Il Contadino": {
+      "nome": "Il",
+      "cognome": "Contadino",
+      "ruolo": "difensore"
+    },
+    "Kevin Squillaci": {
+      "nome": "Kevin",
+      "cognome": "Squillaci",
+      "ruolo": "difensore"
+    },
+    "Luca": {
+      "nome": "Luca",
+      "cognome": "Sconosciuto",
+      "ruolo": "difensore"
+    },
+    "Manuel Torrisi": {
+      "nome": "Manuel",
+      "cognome": "Torrisi",
+      "ruolo": "difensore"
+    },
+    "Manuel Vullo": {
+      "nome": "Manuel",
+      "cognome": "Vullo",
+      "ruolo": "difensore"
+    },
+    "Mirko Torrisi": {
+      "nome": "Mirko",
+      "cognome": "Torrisi",
+      "ruolo": "difensore"
+    },
+    "Salvo L'Umile": {
+      "nome": "Salvo",
+      "cognome": "L'Umile",
+      "ruolo": "difensore"
+    },
+    "Saverio Frandina": {
+      "nome": "Saverio",
+      "cognome": "Frandina",
+      "ruolo": "difensore"
+    },
+    "Sebigiò": {
+      "nome": "Sebigiò",
+      "cognome": "Sconosciuto",
+      "ruolo": "difensore"
+    },
+    "Seby Finocchiaro": {
+      "nome": "Seby",
+      "cognome": "Finocchiaro",
+      "ruolo": "difensore"
+    },
+    "Simone": {
+      "nome": "Simone",
+      "cognome": "Sconosciuto",
+      "ruolo": "difensore"
+    },
+    "Tano Cognato": {
+      "nome": "Tano",
+      "cognome": "Cognato",
+      "ruolo": "difensore"
+    }
+  },
+  "matches": {
+    "8/9": {
+      "neri": [
+        "Biuzzo",
+        "Danilo Nino",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Salvo L'Umile",
+        "Saverio Frandina",
+        "Seby Finocchiaro"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Fabrizio Di Caro",
+        "Gianluca Lo Turco",
+        "Giorgio",
+        "Gost",
+        "Graziano Santangelo",
+        "Haichel",
+        "Iacopo Sarvà",
+        "Il Contadino"
+      ]
+    },
+    "15/9": {
+      "neri": [
+        "Andrea Rosa",
+        "Biuzzo",
+        "Claudio Serra",
+        "Gabriele Simona",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Mirko Torrisi",
+        "Salvo L'Umile",
+        "Saverio Frandina"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Fabrizio Di Caro",
+        "Gianluca Lo Turco",
+        "Graziano Santangelo",
+        "Iacopo Sarvà",
+        "Il Contadino",
+        "Sebigiò",
+        "Tano Cognato"
+      ]
+    },
+    "22/9": {
+      "neri": [
+        "Andrea Rosa",
+        "Biuzzo",
+        "Ciccio Brioscina",
+        "Claudio Serra",
+        "Danilo Nino",
+        "Gabriele Simona",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Mirko Torrisi",
+        "Saverio Frandina",
+        "Seby Finocchiaro"
+      ],
+      "rossi": [
+        "Andrea Rabuazzo",
+        "Costa",
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Gianluca Lo Turco",
+        "Iacopo Sarvà",
+        "Il Contadino"
+      ]
+    },
+    "29/9": {
+      "neri": [
+        "Andrea Rosa",
+        "Biuzzo",
+        "Ciccio Brioscina",
+        "Danilo Nino",
+        "Gabriele Simona",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Mirko Torrisi",
+        "Saverio Frandina",
+        "Seby Finocchiaro"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Gianluca Lo Turco",
+        "Giorgio",
+        "Gost",
+        "Graziano Santangelo",
+        "Iacopo Sarvà",
+        "Il Contadino",
+        "Manuel Vullo",
+        "Simone"
+      ]
+    },
+    "6/10": {
+      "neri": [
+        "Biuzzo",
+        "Ciccio Brioscina",
+        "Danilo Nino",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Mirko Torrisi",
+        "Saverio Frandina"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Fabrizio Di Caro",
+        "Gianluca Lo Turco",
+        "Giorgio",
+        "Gost",
+        "Iacopo Sarvà",
+        "Il Contadino"
+      ]
+    },
+    "15/10": {
+      "neri": [
+        "Biuzzo",
+        "Ciccio Brioscina",
+        "Claudio Serra",
+        "Danilo Nino",
+        "Gabriele Simona",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Mirko Torrisi",
+        "Salvo L'Umile",
+        "Saverio Frandina"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Fabrizio Di Caro",
+        "Gianluca Lo Turco",
+        "Graziano Santangelo",
+        "Iacopo Sarvà",
+        "Il Contadino"
+      ]
+    },
+    "20/10": {
+      "neri": [
+        "Biuzzo",
+        "Gabriele Simona",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Mirko Torrisi",
+        "Salvo L'Umile",
+        "Saverio Frandina"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Fabrizio Di Caro",
+        "Gianluca Lo Turco",
+        "Giorgio",
+        "Graziano Santangelo",
+        "Haichel",
+        "Iacopo Sarvà",
+        "Il Contadino",
+        "Luca"
+      ]
+    },
+    "27/10": {
+      "neri": [
+        "Biuzzo",
+        "Ciccio Brioscina",
+        "Danilo Nino",
+        "Gabriele Simona",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Mirko Torrisi",
+        "Saverio Frandina",
+        "Seby Finocchiaro"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Gianluca Lo Turco",
+        "Giorgio",
+        "Graziano Santangelo",
+        "Haichel",
+        "Iacopo Sarvà",
+        "Luca"
+      ]
+    },
+    "3/11": {
+      "neri": [
+        "Andrea Rosa",
+        "Biuzzo",
+        "Ciccio Brioscina",
+        "Claudio Serra",
+        "Danilo Nino",
+        "Gabriele Simona",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Mirko Torrisi",
+        "Salvo L'Umile",
+        "Saverio Frandina",
+        "Seby Finocchiaro"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Gianluca Lo Turco",
+        "Iacopo Sarvà",
+        "Luca"
+      ]
+    },
+    "17/11": {
+      "neri": [
+        "Biuzzo",
+        "Claudio Serra",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Salvo L'Umile",
+        "Saverio Frandina",
+        "Seby Finocchiaro"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Fabrizio Di Caro",
+        "Gianluca Lo Turco",
+        "Graziano P",
+        "Graziano Santangelo",
+        "Iacopo Sarvà",
+        "Il Contadino",
+        "Luca"
+      ]
+    },
+    "24/11": {
+      "neri": [
+        "Biuzzo",
+        "Ciccio Brioscina",
+        "Claudio Serra",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Salvo L'Umile",
+        "Saverio Frandina"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Gianluca Lo Turco",
+        "Graziano P",
+        "Graziano Santangelo",
+        "Iacopo Sarvà",
+        "Il Contadino",
+        "Manuel Vullo"
+      ]
+    },
+    "12/1": {
+      "neri": [
+        "Andrea Rosa",
+        "Biuzzo",
+        "Ciccio Brioscina",
+        "Giancarlo Corsaro",
+        "Kevin Squillaci",
+        "Manuel Torrisi",
+        "Mirko Torrisi",
+        "Saverio Frandina"
+      ],
+      "rossi": [
+        "Danilo Jamaicano",
+        "Dennis Squillaci",
+        "Fabrizio Di Caro",
+        "Gianluca Lo Turco",
+        "Graziano P",
+        "Graziano Santangelo",
+        "Iacopo Sarvà",
+        "Manuel Vullo"
+      ]
+    }
+  }
+}

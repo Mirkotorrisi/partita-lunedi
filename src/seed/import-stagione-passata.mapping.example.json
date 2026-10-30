@@ -1,0 +1,31 @@
+{
+  "teamNameNeri": "<nome-squadra-neri-nel-db>",
+  "teamNameRossi": "<nome-squadra-rossi-nel-db>",
+  "teamColorNeri": "#111827",
+  "teamColorRossi": "#dc2626",
+  "colorAliases": {
+    "NERI": "neri",
+    "VERDI": "rossi"
+  },
+  "dateAliases": {
+    "29/7": "29/9"
+  },
+  "playerAliases": {
+    "Lo turco": "Lo Turco"
+  },
+  "players": {
+    "Lo Turco": {
+      "nome": "Lo",
+      "cognome": "Turco",
+      "ruolo": "attaccante",
+      "soprannome": "Lo Turco",
+      "attivo": false
+    }
+  },
+  "matches": {
+    "8/9": {
+      "neri": [],
+      "rossi": []
+    }
+  }
+}

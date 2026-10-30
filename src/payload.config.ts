@@ -6,11 +6,14 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { Dispositivi } from './collections/Dispositivi'
 import { Giocatori } from './collections/Giocatori'
+import { Iscrizioni } from './collections/Iscrizioni'
 import { Media } from './collections/Media'
 import { Partite } from './collections/Partite'
 import { Squadre } from './collections/Squadre'
 import { Users } from './collections/Users'
+import { ProssimaPartita } from './globals/ProssimaPartita'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -33,7 +36,8 @@ export default buildConfig({
     supportedLanguages: { it },
     fallbackLanguage: 'it',
   },
-  collections: [Partite, Giocatori, Squadre, Media, Users],
+  collections: [Partite, Iscrizioni, Giocatori, Squadre, Dispositivi, Media, Users],
+  globals: [ProssimaPartita],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

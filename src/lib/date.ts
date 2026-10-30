@@ -19,3 +19,10 @@ export function formatDataBreve(date: Date | string): string {
     year: 'numeric',
   }).format(new Date(date))
 }
+
+/** Lunedì (YYYY-MM-DD, ora italiana) della prossima partita: oggi se è lunedì, altrimenti il successivo. */
+export function prossimoLunedi(da: Date = new Date()): string {
+  const d = new Date(`${toGiorno(da)}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + ((8 - d.getUTCDay()) % 7))
+  return d.toISOString().slice(0, 10)
+}
