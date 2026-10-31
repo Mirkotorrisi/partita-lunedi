@@ -5,6 +5,8 @@ import { revalidateHooks } from '../hooks/revalidateDataset'
 
 const HEX = /^#[0-9a-fA-F]{6}$/
 
+export const COLORE_DEFAULT = '#C6FF3D'
+
 export const Squadre: CollectionConfig = {
   slug: 'squadre',
   labels: { singular: 'Squadra', plural: 'Squadre' },
@@ -33,7 +35,7 @@ export const Squadre: CollectionConfig = {
       label: 'Colore',
       type: 'text',
       required: true,
-      defaultValue: '#C6FF3D',
+      defaultValue: COLORE_DEFAULT,
       admin: { description: 'Esadecimale, es. #E11D48. Usato per badge e grafici.' },
       validate: (value: string | null | undefined) =>
         (value && HEX.test(value)) || 'Inserisci un colore esadecimale nel formato #RRGGBB',

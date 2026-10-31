@@ -22,6 +22,7 @@
     "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed/index.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@payloadcms/db-sqlite": "3.90.2",
     "@payloadcms/next": "3.90.2",
     "@payloadcms/plugin-cloud-storage": "3.90.2",
@@ -38,7 +39,8 @@
     "react-dom": "19.2.6",
     "recharts": "^3.10.1",
     "sharp": "0.35.4",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
