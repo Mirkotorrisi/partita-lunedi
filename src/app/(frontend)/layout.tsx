@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Barlow_Condensed, Inter } from 'next/font/google'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
@@ -46,8 +47,17 @@ export default async function FrontendLayout({ children }: { children: React.Rea
         <RegistraServiceWorker />
         <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-[1100px] items-center justify-between gap-4 px-4 lg:h-16">
-            <Link href="/" className="flex min-h-11 items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
+            <Link href="/" className="flex min-h-11 items-center gap-2.5">
+              {/* Stesso file dell'icona PWA: lo sfondo coincide con quello dell'header, quindi niente bordo. */}
+              <Image
+                src="/icon-192-v2.png"
+                alt=""
+                width={32}
+                height={32}
+                unoptimized
+                priority
+                className="h-8 w-8 rounded-lg lg:h-9 lg:w-9"
+              />
               <span className="font-display text-xl font-bold tracking-wide uppercase">Partita del lunedì</span>
             </Link>
             {/* Da lg in su la nav sta nell'header; sotto è la tab bar fissa in fondo (vedi sotto). */}
