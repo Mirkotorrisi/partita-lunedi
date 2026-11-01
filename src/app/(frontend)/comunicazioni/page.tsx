@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Markdown } from '@/components/ui/Markdown'
 import { formatDataOra } from '@/lib/date'
 
 export const metadata: Metadata = { title: 'Comunicazioni' }
@@ -32,7 +33,7 @@ export default async function ComunicazioniPage() {
                 {formatDataOra(c.createdAt)}
               </time>
               {c.titolo && <h2 className="font-semibold">{c.titolo}</h2>}
-              <p className="whitespace-pre-line">{c.testo}</p>
+              <Markdown testo={c.testo} />
             </li>
           ))}
         </ol>

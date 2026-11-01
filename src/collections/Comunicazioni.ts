@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
+import { markdownATesto } from '../lib/markdown'
 import { inviaNotifica } from '../lib/push'
 
 export const URL_COMUNICAZIONI = '/comunicazioni'
@@ -34,7 +35,8 @@ export const Comunicazioni: CollectionConfig = {
         try {
           const { inviate } = await inviaNotifica({
             title: doc.titolo || 'Partita del lunedì',
-            body: doc.testo,
+            // La notifica di sistema non formatta: via i simboli, i link restano come URL.
+            body: markdownATesto(doc.testo),
             url: URL_COMUNICAZIONI,
           })
           req.payload.logger.info(`Comunicazione ${doc.id} inviata a ${inviate} dispositivi`)
@@ -59,7 +61,11 @@ export const Comunicazioni: CollectionConfig = {
       label: 'Messaggio',
       type: 'textarea',
       required: true,
-      admin: { description: 'Es. "Si gioca alle 21:30". Parte come notifica appena salvi.' },
+      admin: {
+        description:
+          'Es. "Si gioca alle 21:30". Parte come notifica appena salvi. Sul sito si può formattare in markdown: ' +
+          '**grassetto**, *corsivo*, [testo](https://…), elenchi con "- "; gli URL diventano link da soli.',
+      },
     },
     {
       name: 'inviate',

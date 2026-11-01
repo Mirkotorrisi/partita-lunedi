@@ -73,7 +73,14 @@ export function registraProssimaPartita(server: McpServer, payload: Payload) {
         giorno: giorno.nullable().optional().describe('Giorno della partita; null per tornare al prossimo lunedì'),
         ora: z.string().regex(ORA, 'Formato HH:mm').nullable().optional().describe('Orario, es. 21:00; null per toglierlo'),
         campo: z.string().nullable().optional().describe('Nome o indirizzo del campo; null per toglierlo'),
-        notifica: z.string().min(1).optional().describe('Messaggio push da inviare subito a tutti'),
+        notifica: z
+          .string()
+          .min(1)
+          .optional()
+          .describe(
+            'Messaggio da inviare subito a tutti come notifica push; resta leggibile in /comunicazioni, dove è reso in markdown ' +
+              '(grassetto, corsivo, [testo](url), elenchi con "- "; gli URL diventano link). Nella notifica arriva come testo semplice.',
+          ),
       },
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
