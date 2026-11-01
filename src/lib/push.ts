@@ -24,7 +24,7 @@ export async function inviaNotifica(msg: { title: string; body: string; url?: st
     depth: 0,
     pagination: false,
   })
-  const testo = JSON.stringify({ ...msg, url: msg.url ?? '/prenotazioni' })
+  const testo = JSON.stringify({ ...msg, url: msg.url ?? '/comunicazioni' })
   let inviate = 0
   let scadute = 0
   await Promise.allSettled(

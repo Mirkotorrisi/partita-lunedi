@@ -26,3 +26,17 @@ export function prossimoLunedi(da: Date = new Date()): string {
   d.setUTCDate(d.getUTCDate() + ((8 - d.getUTCDay()) % 7))
   return d.toISOString().slice(0, 10)
 }
+
+/** Data e ora in italiano, es. "lun 3 nov, 18:45". */
+export function formatDataOra(date: Date | string): string {
+  return new Intl.DateTimeFormat('it-IT', {
+    timeZone: TIMEZONE,
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+    .format(new Date(date))
+    .replace(/\./g, '')
+}

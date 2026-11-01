@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     partite: Partite;
     iscrizioni: Iscrizioni;
+    comunicazioni: Comunicazioni;
     giocatori: Giocatori;
     squadre: Squadre;
     dispositivi: Dispositivi;
@@ -83,6 +84,7 @@ export interface Config {
   collectionsSelect: {
     partite: PartiteSelect<false> | PartiteSelect<true>;
     iscrizioni: IscrizioniSelect<false> | IscrizioniSelect<true>;
+    comunicazioni: ComunicazioniSelect<false> | ComunicazioniSelect<true>;
     giocatori: GiocatoriSelect<false> | GiocatoriSelect<true>;
     squadre: SquadreSelect<false> | SquadreSelect<true>;
     dispositivi: DispositiviSelect<false> | DispositiviSelect<true>;
@@ -284,6 +286,29 @@ export interface Iscrizioni {
   createdAt: string;
 }
 /**
+ * Ogni comunicazione salvata arriva subito come notifica a chi le ha attivate e resta visibile nella pagina Comunicazioni del sito.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comunicazioni".
+ */
+export interface Comunicazioni {
+  id: number;
+  /**
+   * Facoltativo: è il titolo della notifica. Se vuoto, "Partita del lunedì".
+   */
+  titolo?: string | null;
+  /**
+   * Es. "Si gioca alle 21:30". Parte come notifica appena salvi.
+   */
+  testo: string;
+  /**
+   * Quanti dispositivi hanno ricevuto la notifica.
+   */
+  inviate?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Eliminare un dispositivo lo scollega dal giocatore: alla prossima visita dovrà selezionarsi di nuovo.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -371,6 +396,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'iscrizioni';
         value: number | Iscrizioni;
+      } | null)
+    | ({
+        relationTo: 'comunicazioni';
+        value: number | Comunicazioni;
       } | null)
     | ({
         relationTo: 'giocatori';
@@ -476,6 +505,17 @@ export interface IscrizioniSelect<T extends boolean = true> {
   giorno?: T;
   giocatore?: T;
   squadra?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comunicazioni_select".
+ */
+export interface ComunicazioniSelect<T extends boolean = true> {
+  titolo?: T;
+  testo?: T;
+  inviate?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -647,7 +687,7 @@ export interface ProssimaPartita {
    */
   campo?: string | null;
   /**
-   * Scrivi un messaggio e salva: arriva subito a chi ha attivato le notifiche (es. "Si gioca alle 21:30"). Il campo si svuota dopo l’invio.
+   * Scrivi un messaggio e salva: arriva subito a chi ha attivato le notifiche (es. "Si gioca alle 21:30") e viene salvato tra le Comunicazioni. Il campo si svuota dopo l’invio.
    */
   notifica?: string | null;
   updatedAt?: string | null;

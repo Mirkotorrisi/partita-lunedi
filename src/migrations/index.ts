@@ -4,6 +4,7 @@ import * as migration_20261030_094718_add_prenotazioni from './20261030_094718_a
 import * as migration_20261030_095550_add_prossima_partita from './20261030_095550_add_prossima_partita';
 import * as migration_20261030_114700_add_push from './20261030_114700_add_push';
 import * as migration_20261030_123736_add_cloud_storage from './20261030_123736_add_cloud_storage';
+import * as migration_20261101_135810_add_comunicazioni from './20261101_135810_add_comunicazioni';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261030_123736_add_cloud_storage.up,
     down: migration_20261030_123736_add_cloud_storage.down,
-    name: '20261030_123736_add_cloud_storage'
+    name: '20261030_123736_add_cloud_storage',
+  },
+  {
+    up: migration_20261101_135810_add_comunicazioni.up,
+    down: migration_20261101_135810_add_comunicazioni.down,
+    name: '20261101_135810_add_comunicazioni'
   },
 ];

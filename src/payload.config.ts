@@ -6,6 +6,7 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { Comunicazioni } from './collections/Comunicazioni'
 import { Dispositivi } from './collections/Dispositivi'
 import { Giocatori } from './collections/Giocatori'
 import { Iscrizioni } from './collections/Iscrizioni'
@@ -37,7 +38,7 @@ export default buildConfig({
     supportedLanguages: { it },
     fallbackLanguage: 'it',
   },
-  collections: [Partite, Iscrizioni, Giocatori, Squadre, Dispositivi, Media, Users],
+  collections: [Partite, Iscrizioni, Comunicazioni, Giocatori, Squadre, Dispositivi, Media, Users],
   globals: [ProssimaPartita],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
