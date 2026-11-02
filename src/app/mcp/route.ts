@@ -36,6 +36,13 @@ async function gestisci(request: Request): Promise<Response> {
   if (origin && new URL(origin).host !== request.headers.get('host')) {
     return Response.json({ error: 'Origin non consentita' }, { status: 403 })
   }
+  // Niente stream SSE: il server è stateless e risponde in JSON. Il 405 è la risposta prevista dalla
+  // specifica MCP e il client smette di chiedere lo stream. Qualsiasi altra risposta (anche un 200 con
+  // stream chiuso subito) fa riconnettere il client ogni secondo all'infinito: una invocazione al
+  // secondo su Netlify per ogni sessione collegata.
+  if (request.method === 'GET') {
+    return new Response(null, { status: 405, headers: { Allow: 'POST, DELETE' } })
+  }
 
   const payload = await getPayload({ config })
   const server = creaServerMcp(payload)
@@ -53,5 +60,5 @@ async function gestisci(request: Request): Promise<Response> {
 }
 
 export const POST = gestisci
-export const GET = gestisci
+export const GET = gestisci // risponde 405 (vedi sopra)
 export const DELETE = gestisci
