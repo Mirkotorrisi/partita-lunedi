@@ -13,13 +13,16 @@ export interface GiocatoreScelta {
   id: number
   nome: string
   soprannome: string | null
+  numeroMaglia: number | null
+  anagrafica: Pick<Giocatore, 'nome' | 'cognome' | 'fotoUrl'>
 }
 
 export interface Io extends GiocatoreScelta {
-  numeroMaglia: number | null
   iscritto: boolean
-  anagrafica: Pick<Giocatore, 'nome' | 'cognome' | 'fotoUrl'>
 }
+
+/** Il server non riconosce più il dispositivo: si torna alla scelta del giocatore. */
+export const CODICE_DISPOSITIVO = 'dispositivo'
 
 const BTN = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold disabled:opacity-50'
 const BTN_PRIMARIO = `${BTN} bg-accent text-bg`
@@ -27,22 +30,39 @@ const BTN_SECONDARIO = `${BTN} border border-border text-text hover:border-muted
 const INPUT = 'min-h-11 w-full rounded-xl border border-border bg-surface-2 px-3 text-text placeholder:text-muted'
 
 /** Tutto ciò che dipende dal dispositivo: scelta del giocatore, prenotazione e profilo. */
-export function AreaGiocatore({ io, giocatori }: { io: Io | null; giocatori: GiocatoreScelta[] }) {
-  return io ? <Prenotazione io={io} /> : <Selezione giocatori={giocatori} />
+export function AreaGiocatore({
+  io,
+  giocatori,
+  onAssociato,
+  onScollegato,
+}: {
+  io: Io | null
+  giocatori: GiocatoreScelta[]
+  onAssociato: (id: number) => void
+  onScollegato: () => void
+}) {
+  return io ? (
+    <Prenotazione io={io} onScollegato={onScollegato} />
+  ) : (
+    <Selezione giocatori={giocatori} onAssociato={onAssociato} />
+  )
 }
 
-function useAzione() {
+type Esito = { ok: boolean; errore?: string; codice?: string }
+
+function useAzione(onDispositivoPerso?: () => void) {
   const [pending, startTransition] = useTransition()
   const [errore, setErrore] = useState<string | null>(null)
-  const esegui = (fn: () => Promise<{ ok: boolean; errore?: string }>) =>
+  const esegui = (fn: () => Promise<Esito>) =>
     startTransition(async () => {
       const res = await fn()
       setErrore(res.ok ? null : (res.errore ?? 'Qualcosa è andato storto'))
+      if (!res.ok && res.codice === CODICE_DISPOSITIVO) onDispositivoPerso?.()
     })
   return { pending, errore, esegui }
 }
 
-function Selezione({ giocatori }: { giocatori: GiocatoreScelta[] }) {
+function Selezione({ giocatori, onAssociato }: { giocatori: GiocatoreScelta[]; onAssociato: (id: number) => void }) {
   const { pending, errore, esegui } = useAzione()
   const [fingerprint, setFingerprint] = useState<string | null>(null)
   const [suggerito, setSuggerito] = useState<{ giocatoreId: number; nome: string } | null>(null)
@@ -68,7 +88,12 @@ function Selezione({ giocatori }: { giocatori: GiocatoreScelta[] }) {
     return q ? giocatori.filter((g) => `${g.nome} ${g.soprannome ?? ''}`.toLowerCase().includes(q)) : giocatori
   }, [giocatori, cerca])
 
-  const conferma = (id: number) => esegui(() => associa(id, fingerprint ?? ''))
+  const conferma = (id: number) =>
+    esegui(async () => {
+      const res = await associa(id, fingerprint ?? '')
+      if (res.ok) onAssociato(id)
+      return res
+    })
 
   if (fingerprint === null) return <div className="card skeleton h-32" aria-busy="true" />
 
@@ -147,8 +172,8 @@ function Selezione({ giocatori }: { giocatori: GiocatoreScelta[] }) {
   )
 }
 
-function Prenotazione({ io }: { io: Io }) {
-  const { pending, errore, esegui } = useAzione()
+function Prenotazione({ io, onScollegato }: { io: Io; onScollegato: () => void }) {
+  const { pending, errore, esegui } = useAzione(onScollegato)
   const [soprannome, setSoprannome] = useState(io.soprannome ?? '')
   const [maglia, setMaglia] = useState(io.numeroMaglia?.toString() ?? '')
   const [salvato, setSalvato] = useState(false)
@@ -241,7 +266,13 @@ function Prenotazione({ io }: { io: Io }) {
         </form>
         <div className="mt-4 flex flex-col border-t border-border pt-3">
           <NotificheToggle />
-          <button className="inline-flex min-h-11 items-center gap-2 text-sm text-muted hover:text-text" disabled={pending} onClick={() => esegui(scollega)}>
+          <button className="inline-flex min-h-11 items-center gap-2 text-sm text-muted hover:text-text" disabled={pending} onClick={() =>
+              esegui(async () => {
+                const res = await scollega()
+                if (res.ok) onScollegato()
+                return res
+              })
+            }>
             <LogOut className="h-4 w-4" aria-hidden="true" /> Non sono {io.soprannome || io.nome}
           </button>
         </div>

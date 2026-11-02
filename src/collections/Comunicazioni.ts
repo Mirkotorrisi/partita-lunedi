@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
+import { revalidatePathHooks } from '../hooks/revalidate'
 import { markdownATesto } from '../lib/markdown'
 import { inviaNotifica } from '../lib/push'
 
@@ -28,7 +29,10 @@ export const Comunicazioni: CollectionConfig = {
     delete: authenticated,
   },
   hooks: {
+    // /comunicazioni è statica: si rigenera a ogni comunicazione creata, modificata o eliminata.
+    afterDelete: revalidatePathHooks(URL_COMUNICAZIONI).afterDelete,
     afterChange: [
+      ...revalidatePathHooks(URL_COMUNICAZIONI).afterChange,
       async ({ doc, operation, req }) => {
         // Si invia una volta sola, alla creazione: le modifiche successive non rinotificano.
         if (operation !== 'create') return doc

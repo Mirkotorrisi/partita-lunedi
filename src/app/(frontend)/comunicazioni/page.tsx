@@ -9,8 +9,8 @@ import { Markdown } from '@/components/ui/Markdown'
 import { formatDataOra } from '@/lib/date'
 
 export const metadata: Metadata = { title: 'Comunicazioni' }
-// Le notifiche portano qui: la lista dev'essere sempre aggiornata, quindi niente cache.
-export const dynamic = 'force-dynamic'
+// Pagina statica: la collection Comunicazioni la rigenera a ogni modifica; l'ora è una rete di sicurezza.
+export const revalidate = 3600
 
 export default async function ComunicazioniPage() {
   const payload = await getPayload({ config })

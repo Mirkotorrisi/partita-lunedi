@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
+import { revalidatePathHooks } from '../hooks/revalidate'
 import { relId } from '../lib/relations'
 
 /**
@@ -23,6 +24,8 @@ export const Iscrizioni: CollectionConfig = {
     delete: authenticated,
   },
   hooks: {
+    // La lista degli iscritti è una pagina statica: ogni modifica la rigenera.
+    ...revalidatePathHooks('/prenotazioni'),
     beforeValidate: [
       async ({ data, operation, req }) => {
         // Alla creazione la squadra "naturale" è quella abituale del giocatore; l'admin può cambiarla.

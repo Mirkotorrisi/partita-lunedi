@@ -16,7 +16,8 @@ import {
 } from '@/lib/prenotazioni'
 import { relId } from '@/lib/relations'
 
-type Esito = { ok: true } | { ok: false; errore: string }
+/** `codice: 'dispositivo'` → il cookie non vale più: il client torna alla scelta del giocatore. */
+type Esito = { ok: true } | { ok: false; errore: string; codice?: 'dispositivo' }
 export type Riconoscimento =
   | { stato: 'noto' }
   | { stato: 'suggerito'; giocatoreId: number; nome: string }
@@ -24,9 +25,20 @@ export type Riconoscimento =
 
 const FINGERPRINT = /^[a-f0-9]{64}$/
 const SOPRANNOME_MAX = 30
-const ERRORE_DISPOSITIVO = 'Dispositivo non riconosciuto: selezionati di nuovo dalla lista.'
+const ERRORE_DISPOSITIVO: Esito = {
+  ok: false,
+  errore: 'Dispositivo non riconosciuto: selezionati di nuovo dalla lista.',
+  codice: 'dispositivo',
+}
 
 const aggiorna = () => revalidatePath('/prenotazioni')
+
+/** Giocatore associato a questo dispositivo (dal cookie), oppure null. Serve al client la prima volta. */
+export async function chiSono(): Promise<number | null> {
+  const dispositivo = await dispositivoCorrente()
+  const id = dispositivo ? relId(dispositivo.giocatore) : undefined
+  return typeof id === 'number' ? id : null
+}
 
 /**
  * Il cookie è il riconoscimento principale. Se manca (cancellato) si prova con il fingerprint:
@@ -107,7 +119,7 @@ export async function scollega(): Promise<Esito> {
 export async function prenota(): Promise<Esito> {
   const dispositivo = await dispositivoCorrente()
   const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
-  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+  if (!dispositivo || typeof giocatoreId !== 'number') return ERRORE_DISPOSITIVO
 
   const payload = await getPayload({ config })
   const giorno = await giornoPrenotazioni()
@@ -136,7 +148,7 @@ export async function prenota(): Promise<Esito> {
 export async function annulla(): Promise<Esito> {
   const dispositivo = await dispositivoCorrente()
   const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
-  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+  if (!dispositivo || typeof giocatoreId !== 'number') return ERRORE_DISPOSITIVO
 
   const payload = await getPayload({ config })
   await payload.delete({
@@ -151,7 +163,7 @@ export async function annulla(): Promise<Esito> {
 export async function aggiornaProfilo(input: { soprannome: string; numeroMaglia: number | null }): Promise<Esito> {
   const dispositivo = await dispositivoCorrente()
   const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
-  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+  if (!dispositivo || typeof giocatoreId !== 'number') return ERRORE_DISPOSITIVO
 
   const soprannome = String(input.soprannome ?? '').trim().replace(/\s+/g, ' ')
   if (soprannome.length > SOPRANNOME_MAX) {
@@ -181,7 +193,7 @@ async function segnaAccesso(id: number) {
 /** Sottoscrizione push di questo dispositivo (deve già essere associato a un giocatore). */
 export async function salvaPush(sub: { endpoint: string; keys: { p256dh: string; auth: string } }): Promise<Esito> {
   const dispositivo = await dispositivoCorrente()
-  if (!dispositivo) return { ok: false, errore: ERRORE_DISPOSITIVO }
+  if (!dispositivo) return ERRORE_DISPOSITIVO
   const valida =
     typeof sub?.endpoint === 'string' &&
     sub.endpoint.startsWith('https://') &&
@@ -200,7 +212,7 @@ export async function salvaPush(sub: { endpoint: string; keys: { p256dh: string;
 
 export async function rimuoviPush(): Promise<Esito> {
   const dispositivo = await dispositivoCorrente()
-  if (!dispositivo) return { ok: false, errore: ERRORE_DISPOSITIVO }
+  if (!dispositivo) return ERRORE_DISPOSITIVO
   const payload = await getPayload({ config })
   await payload.update({ collection: 'dispositivi', id: dispositivo.id, data: { pushSubscription: null } })
   return { ok: true }
@@ -212,7 +224,7 @@ const FOTO_MAX_BYTE = 1024 * 1024
 export async function caricaFoto(formData: FormData): Promise<Esito> {
   const dispositivo = await dispositivoCorrente()
   const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
-  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+  if (!dispositivo || typeof giocatoreId !== 'number') return ERRORE_DISPOSITIVO
 
   const file = formData.get('foto')
   if (!(file instanceof File) || file.size === 0) return { ok: false, errore: 'Nessuna foto selezionata' }
@@ -245,7 +257,7 @@ export async function caricaFoto(formData: FormData): Promise<Esito> {
 export async function rimuoviFoto(): Promise<Esito> {
   const dispositivo = await dispositivoCorrente()
   const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
-  if (!dispositivo || typeof giocatoreId !== 'number') return { ok: false, errore: ERRORE_DISPOSITIVO }
+  if (!dispositivo || typeof giocatoreId !== 'number') return ERRORE_DISPOSITIVO
 
   const payload = await getPayload({ config })
   const giocatore = await payload.findByID({ collection: 'giocatori', id: giocatoreId, depth: 0 })

@@ -4,7 +4,7 @@ import { getPayload } from 'payload'
 
 import type { Giocatori, Media, Partite } from '@/payload-types'
 
-import { DATASET_TAG } from './cache-tags'
+import { DATASET_TAG, TUTTE_LE_STAGIONI } from './cache-tags'
 import { relId } from './relations'
 import { elencoStagioni, filtraPartite, type Giocatore, type Id, type Partita, type Riga, type Squadra } from './stats'
 
@@ -76,10 +76,11 @@ export const getDataset = unstable_cache(
     }
   },
   ['dataset'],
-  { tags: [DATASET_TAG] },
+  // Gli hook di Payload invalidano il tag al salvataggio; l'ora è solo una rete di sicurezza.
+  { tags: [DATASET_TAG], revalidate: 3600 },
 )
 
-export const TUTTE_LE_STAGIONI = 'tutte'
+export { TUTTE_LE_STAGIONI }
 
 export interface Contesto extends Dataset {
   /** Partite del periodo selezionato, in ordine cronologico. */
@@ -92,8 +93,8 @@ export interface Contesto extends Dataset {
 }
 
 /**
- * Dataset + filtro stagione da `?stagione=`. Senza parametro (o con un valore sconosciuto)
- * vale la stagione più recente con almeno una partita.
+ * Dataset + filtro stagione (segmento `/stagione/[stagione]`). Senza parametro (o con un valore
+ * sconosciuto) vale la stagione più recente con almeno una partita.
  */
 export async function getContesto(stagioneParam?: string | string[]): Promise<Contesto> {
   const dataset = await getDataset()

@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
+import { revalidatePathGlobalHook } from '../hooks/revalidate'
 
 /** Dettagli della prossima partita, mostrati sempre in cima a /prenotazioni. */
 export const ProssimaPartita: GlobalConfig = {
@@ -19,6 +20,8 @@ export const ProssimaPartita: GlobalConfig = {
       },
     ],
     afterChange: [
+      // Giorno, ora e campo compaiono in cima a /prenotazioni, che è statica.
+      revalidatePathGlobalHook('/prenotazioni'),
       async ({ doc, context, req }) => {
         if (typeof context.notifica !== 'string') return doc
         try {

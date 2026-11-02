@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
-import { revalidateHooks } from '../hooks/revalidateDataset'
+import { revalidateHooks } from '../hooks/revalidate'
 
 const HEX = /^#[0-9a-fA-F]{6}$/
 

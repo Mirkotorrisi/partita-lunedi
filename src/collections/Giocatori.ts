@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
-import { revalidateHooks } from '../hooks/revalidateDataset'
+import { revalidateHooks } from '../hooks/revalidate'
 import { slugify } from '../lib/slugify'
 
 export const RUOLI = [

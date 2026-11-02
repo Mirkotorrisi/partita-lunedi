@@ -2,21 +2,26 @@ import config from '@payload-config'
 import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 
-import { AreaGiocatore, type Io } from '@/components/prenotazioni/AreaGiocatore'
+import { Prenotazioni } from '@/components/prenotazioni/Prenotazioni'
+import type { GiocatoreScelta } from '@/components/prenotazioni/AreaGiocatore'
+import type { Iscritto } from '@/components/prenotazioni/ListaIscritti'
 import { InstallaApp } from '@/components/pwa/InstallaApp'
-import { ListaIscritti, type Iscritto } from '@/components/prenotazioni/ListaIscritti'
 import { getContesto } from '@/lib/data'
 import { formatGiornoEsteso, nomeCompleto } from '@/lib/format'
-import { dettagliPartita, dispositivoCorrente } from '@/lib/prenotazioni'
+import { dettagliPartita } from '@/lib/prenotazioni'
 import { relId } from '@/lib/relations'
 
 export const metadata: Metadata = { title: 'Prenotazioni' }
-// Lista sempre fresca: le prenotazioni non passano dalla cache del dataset.
-export const dynamic = 'force-dynamic'
+/**
+ * Pagina statica, uguale per tutti: la lista si rigenera a ogni prenotazione (revalidatePath nelle
+ * azioni e negli hook di Iscrizioni e Prossima partita). Chi è il visitatore lo stabilisce il client,
+ * così un refresh non costa una render. L'ora serve a far scorrere il giorno se nessuno salva nulla.
+ */
+export const revalidate = 3600
 
 export default async function PrenotazioniPage() {
   const payload = await getPayload({ config })
-  const [{ giorno, ora, campo }, ctx, dispositivo] = await Promise.all([dettagliPartita(), getContesto(), dispositivoCorrente()])
+  const [{ giorno, ora, campo }, ctx] = await Promise.all([dettagliPartita(), getContesto()])
   const { docs } = await payload.find({
     collection: 'iscrizioni',
     where: { giorno: { equals: giorno } },
@@ -31,23 +36,15 @@ export default async function PrenotazioniPage() {
     return [{ posizione: i + 1, giocatore, squadraId: relId(d.squadra) ?? null, quando: d.createdAt }]
   })
 
-  const ioId = dispositivo ? relId(dispositivo.giocatore) : undefined
-  const me = ioId !== undefined ? ctx.giocatoriById.get(ioId) : undefined
-  const io: Io | null =
-    me && typeof me.id === 'number'
-      ? {
-          id: me.id,
-          nome: nomeCompleto(me),
-          soprannome: me.soprannome,
-          numeroMaglia: me.numeroMaglia,
-          iscritto: iscritti.some((i) => i.giocatore.id === me.id),
-          anagrafica: { nome: me.nome, cognome: me.cognome, fotoUrl: me.fotoUrl },
-        }
-      : null
-
-  const scelta = ctx.giocatori
+  const scelta: GiocatoreScelta[] = ctx.giocatori
     .filter((g) => g.attivo && typeof g.id === 'number')
-    .map((g) => ({ id: g.id as number, nome: nomeCompleto(g), soprannome: g.soprannome }))
+    .map((g) => ({
+      id: g.id as number,
+      nome: nomeCompleto(g),
+      soprannome: g.soprannome,
+      numeroMaglia: g.numeroMaglia,
+      anagrafica: { nome: g.nome, cognome: g.cognome, fotoUrl: g.fotoUrl },
+    }))
 
   return (
     <div className="flex flex-col gap-6">
@@ -60,15 +57,7 @@ export default async function PrenotazioniPage() {
         {campo && <p className="text-sm">Campo: {campo}</p>}
       </header>
 
-      <AreaGiocatore io={io} giocatori={scelta} />
-      <InstallaApp />
-
-      <section aria-labelledby="lista" className="flex flex-col gap-3">
-        <h2 id="lista" className="label">
-          Lista in ordine di arrivo
-        </h2>
-        <ListaIscritti iscritti={iscritti} squadre={ctx.squadre} ioId={io?.id ?? null} />
-      </section>
+      <Prenotazioni giocatori={scelta} iscritti={iscritti} squadre={ctx.squadre} installaApp={<InstallaApp />} />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
-import { revalidateHooks } from '../hooks/revalidateDataset'
+import { revalidateHooks } from '../hooks/revalidate'
 
 export const Media: CollectionConfig = {
   slug: 'media',

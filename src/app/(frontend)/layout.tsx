@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next'
 import { Barlow_Condensed, Inter } from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Suspense } from 'react'
 
 import { RegistraServiceWorker } from '@/components/pwa/RegistraServiceWorker'
 import { NavLinks } from '@/components/layout/NavLinks'
@@ -38,7 +37,7 @@ export const viewport: Viewport = {
 }
 
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
-  // Senza searchParams: il layout serve solo l'elenco stagioni, la scelta la legge il client.
+  // Il layout serve solo l'elenco stagioni: quella scelta la leggono nav e selettore dal percorso.
   const { stagioni } = await getContesto()
 
   return (
@@ -62,22 +61,16 @@ export default async function FrontendLayout({ children }: { children: React.Rea
             </Link>
             {/* Da lg in su la nav sta nell'header; sotto è la tab bar fissa in fondo (vedi sotto). */}
             <div className="hidden lg:block">
-              <Suspense fallback={null}>
-                <NavLinks />
-              </Suspense>
+              <NavLinks />
             </div>
-            <Suspense fallback={<div className="h-11 w-28" />}>
-              <SeasonSelect stagioni={stagioni} predefinita={stagioni[0] ?? TUTTE_LE_STAGIONI} tutte={TUTTE_LE_STAGIONI} />
-            </Suspense>
+            <SeasonSelect stagioni={stagioni} predefinita={stagioni[0] ?? TUTTE_LE_STAGIONI} tutte={TUTTE_LE_STAGIONI} />
           </div>
         </header>
         <main className="mx-auto max-w-[1100px] px-4 pt-4 pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom)+24px)] lg:pt-6 lg:pb-12">
           {children}
         </main>
         <div className="lg:hidden">
-          <Suspense fallback={null}>
-            <NavLinks />
-          </Suspense>
+          <NavLinks />
         </div>
       </body>
     </html>

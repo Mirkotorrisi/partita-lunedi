@@ -1,10 +1,18 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 
-/** Dropdown stagione: scrive `?stagione=` nell'URL, che tutte le pagine leggono. */
+import { conStagione, senzaStagione, stagioneDaPathname } from '@/lib/urls'
+
+/** Pagine che esistono anche sotto `/stagione/[stagione]`; altrove la scelta porta alla home. */
+const STAGIONALI = ['/', '/partite', '/giocatori']
+
+/**
+ * Dropdown stagione: porta alla stessa pagina sotto `/stagione/[stagione]/…`. La stagione
+ * predefinita (la più recente) resta sul percorso nudo, che è la pagina canonica.
+ */
 export function SeasonSelect({
   stagioni,
   predefinita,
@@ -17,16 +25,16 @@ export function SeasonSelect({
 }) {
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const [pending, startTransition] = useTransition()
 
-  const corrente = searchParams.get('stagione')
+  const corrente = stagioneDaPathname(pathname)
   const valore = corrente && (corrente === tutte || stagioni.includes(corrente)) ? corrente : predefinita
 
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('stagione', e.target.value)
-    startTransition(() => router.push(`${pathname}?${params.toString()}`, { scroll: false }))
+    const scelta = e.target.value
+    const pagina = senzaStagione(pathname)
+    const base = STAGIONALI.some((p) => pagina === p || pagina.startsWith(`${p}/`)) ? pagina : '/'
+    startTransition(() => router.push(conStagione(base, scelta === predefinita ? undefined : scelta), { scroll: false }))
   }
 
   return (
