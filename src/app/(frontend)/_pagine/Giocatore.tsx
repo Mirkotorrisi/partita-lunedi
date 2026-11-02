@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { GolChart, VotiChart, type PuntoPartita } from '@/components/charts/PlayerTrendCharts'
+import { SchedaAbilita } from '@/components/giocatori/SchedaAbilita'
 import { BallIcon } from '@/components/ui/BallIcon'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Markdown } from '@/components/ui/Markdown'
 import { PlayerAvatar } from '@/components/ui/PlayerAvatar'
 import { ResultBadge } from '@/components/ui/ResultBadge'
 import { SegmentedBar } from '@/components/ui/SegmentedBar'
@@ -23,9 +25,10 @@ import {
   formatVoto,
   nomeCompleto,
   nomeVisualizzato,
+  PIEDE_ESTESO,
   RUOLO_ESTESO,
 } from '@/lib/format'
-import { statsGiocatore } from '@/lib/stats'
+import { statsGiocatore, type Giocatore as DatiGiocatore } from '@/lib/stats'
 import { conStagione } from '@/lib/urls'
 
 async function trovaGiocatore(slug: string) {
@@ -44,6 +47,44 @@ export async function metadataGiocatore(slug: string): Promise<Metadata> {
 }
 
 export type PropsGiocatore = { slug: string; stagione?: string }
+
+/** Un dato della scheda (piede, classe, altezza): etichetta sopra, valore sotto. */
+function Dato({ label, value, unita }: { label: string; value: React.ReactNode; unita?: string }) {
+  return (
+    <div className="flex min-w-0 flex-col items-center gap-1 px-2 text-center">
+      <dt className="label">{label}</dt>
+      <dd className="num text-2xl leading-none">
+        {value}
+        {unita && <span className="ml-1 text-sm font-normal text-muted">{unita}</span>}
+      </dd>
+    </div>
+  )
+}
+
+// Classi complete, non interpolate: Tailwind genera solo quelle che trova scritte per intero.
+const COLONNE: Record<number, string> = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3' }
+
+/** Piede, anno di nascita, altezza e presentazione: compare solo se c'è almeno un dato. */
+function Scheda({ giocatore }: { giocatore: DatiGiocatore }) {
+  const dati = [
+    giocatore.piedePreferito && <Dato key="piede" label="Piede" value={PIEDE_ESTESO[giocatore.piedePreferito]} />,
+    giocatore.annoNascita !== null && <Dato key="classe" label="Classe" value={giocatore.annoNascita} />,
+    giocatore.altezza !== null && <Dato key="altezza" label="Altezza" value={giocatore.altezza} unita="cm" />,
+  ].filter(Boolean)
+  if (dati.length === 0 && !giocatore.descrizione) return null
+
+  return (
+    <section aria-labelledby="scheda" className="flex flex-col gap-3">
+      <h2 id="scheda" className="label">
+        Scheda
+      </h2>
+      {dati.length > 0 && (
+        <dl className={`card grid divide-x divide-border ${COLONNE[dati.length]}`}>{dati}</dl>
+      )}
+      {giocatore.descrizione && <Markdown testo={giocatore.descrizione} className="card text-sm" />}
+    </section>
+  )
+}
 
 /** Scheda giocatore: numeri, andamento e partita per partita nella stagione selezionata. */
 export async function Giocatore({ slug, stagione }: PropsGiocatore) {
@@ -90,6 +131,9 @@ export async function Giocatore({ slug, stagione }: PropsGiocatore) {
           </span>
         )}
       </header>
+
+      <Scheda giocatore={giocatore} />
+      <SchedaAbilita abilita={giocatore.abilita} ruolo={giocatore.ruolo} />
 
       {s.presenze === 0 ? (
         <EmptyState message={`Nessuna presenza · ${periodo}`} icon={CalendarX} />

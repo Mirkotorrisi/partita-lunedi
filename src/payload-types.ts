@@ -216,6 +216,48 @@ export interface Giocatori {
    */
   squadraAbituale?: (number | null) | Squadre;
   foto?: (number | null) | Media;
+  piedePreferito?: ('destro' | 'sinistro' | 'ambidestro') | null;
+  annoNascita?: number | null;
+  altezza?: number | null;
+  /**
+   * Breve presentazione mostrata nella scheda. Si può formattare in markdown: **grassetto**, *corsivo*, [testo](https://…), elenchi con "- ".
+   */
+  descrizione?: string | null;
+  /**
+   * Da 1 a 99 come nelle card dei videogiochi. Le voci vuote non contano: il valore di ogni categoria è la media di quelle compilate.
+   */
+  abilita?: {
+    attacco?: {
+      finalizzazione?: number | null;
+      potenzaTiro?: number | null;
+      posizionamento?: number | null;
+    };
+    dribbling?: {
+      controlloPalla?: number | null;
+      dribbling?: number | null;
+      agilita?: number | null;
+    };
+    passaggio?: {
+      passaggioCorto?: number | null;
+      passaggioLungo?: number | null;
+      visione?: number | null;
+    };
+    difesa?: {
+      contrasto?: number | null;
+      marcatura?: number | null;
+      anticipo?: number | null;
+    };
+    fisico?: {
+      velocita?: number | null;
+      resistenza?: number | null;
+      forza?: number | null;
+    };
+    portiere?: {
+      riflessi?: number | null;
+      parate?: number | null;
+      uscite?: number | null;
+    };
+  };
   nomeCompleto?: string | null;
   /**
    * Generato da nome e cognome. Usato nell’URL della scheda giocatore.
@@ -298,7 +340,7 @@ export interface Comunicazioni {
    */
   titolo?: string | null;
   /**
-   * Es. "Si gioca alle 21:30". Parte come notifica appena salvi.
+   * Es. "Si gioca alle 21:30". Parte come notifica appena salvi. Sul sito si può formattare in markdown: **grassetto**, *corsivo*, [testo](https://…), elenchi con "- "; gli URL diventano link da soli.
    */
   testo: string;
   /**
@@ -531,6 +573,56 @@ export interface GiocatoriSelect<T extends boolean = true> {
   numeroMaglia?: T;
   squadraAbituale?: T;
   foto?: T;
+  piedePreferito?: T;
+  annoNascita?: T;
+  altezza?: T;
+  descrizione?: T;
+  abilita?:
+    | T
+    | {
+        attacco?:
+          | T
+          | {
+              finalizzazione?: T;
+              potenzaTiro?: T;
+              posizionamento?: T;
+            };
+        dribbling?:
+          | T
+          | {
+              controlloPalla?: T;
+              dribbling?: T;
+              agilita?: T;
+            };
+        passaggio?:
+          | T
+          | {
+              passaggioCorto?: T;
+              passaggioLungo?: T;
+              visione?: T;
+            };
+        difesa?:
+          | T
+          | {
+              contrasto?: T;
+              marcatura?: T;
+              anticipo?: T;
+            };
+        fisico?:
+          | T
+          | {
+              velocita?: T;
+              resistenza?: T;
+              forza?: T;
+            };
+        portiere?:
+          | T
+          | {
+              riflessi?: T;
+              parate?: T;
+              uscite?: T;
+            };
+      };
   nomeCompleto?: T;
   slug?: T;
   attivo?: T;

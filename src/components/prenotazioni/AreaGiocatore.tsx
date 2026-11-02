@@ -7,13 +7,17 @@ import { aggiornaProfilo, annulla, associa, prenota, riconosci, scollega } from 
 import { FotoProfilo } from '@/components/prenotazioni/FotoProfilo'
 import { NotificheToggle } from '@/components/pwa/NotificheToggle'
 import { calcolaFingerprint } from '@/lib/fingerprint'
-import type { Giocatore } from '@/lib/stats'
+import { ALTEZZA_CM, ANNO_NASCITA, PIEDE_ESTESO, PIEDI } from '@/lib/format'
+import type { Giocatore, Piede } from '@/lib/stats'
 
 export interface GiocatoreScelta {
   id: number
   nome: string
   soprannome: string | null
   numeroMaglia: number | null
+  piedePreferito: Piede | null
+  annoNascita: number | null
+  altezza: number | null
   anagrafica: Pick<Giocatore, 'nome' | 'cognome' | 'fotoUrl'>
 }
 
@@ -176,12 +180,26 @@ function Prenotazione({ io, onScollegato }: { io: Io; onScollegato: () => void }
   const { pending, errore, esegui } = useAzione(onScollegato)
   const [soprannome, setSoprannome] = useState(io.soprannome ?? '')
   const [maglia, setMaglia] = useState(io.numeroMaglia?.toString() ?? '')
+  const [piede, setPiede] = useState<Piede | ''>(io.piedePreferito ?? '')
+  const [anno, setAnno] = useState(io.annoNascita?.toString() ?? '')
+  const [altezza, setAltezza] = useState(io.altezza?.toString() ?? '')
   const [salvato, setSalvato] = useState(false)
 
+  const numero = (s: string) => (s.trim() === '' ? null : Number(s))
+  const cambia = <T,>(set: (v: T) => void) => (v: T) => {
+    set(v)
+    setSalvato(false)
+  }
+
   const salva = () => {
-    const numero = maglia.trim() === '' ? null : Number(maglia)
     esegui(async () => {
-      const res = await aggiornaProfilo({ soprannome, numeroMaglia: numero })
+      const res = await aggiornaProfilo({
+        soprannome,
+        numeroMaglia: numero(maglia),
+        piedePreferito: piede || null,
+        annoNascita: numero(anno),
+        altezza: numero(altezza),
+      })
       setSalvato(res.ok)
       return res
     })
@@ -217,7 +235,7 @@ function Prenotazione({ io, onScollegato }: { io: Io; onScollegato: () => void }
       <details className="card group">
         <summary className="flex min-h-11 cursor-pointer items-center justify-between font-medium">
           Il mio profilo
-          <span className="text-xs text-muted">soprannome e maglia</span>
+          <span className="text-xs text-muted">foto, soprannome, maglia e dati</span>
         </summary>
         <div className="mt-3">
           <FotoProfilo giocatore={io.anagrafica} />
@@ -234,10 +252,7 @@ function Prenotazione({ io, onScollegato }: { io: Io; onScollegato: () => void }
             <input
               value={soprannome}
               maxLength={30}
-              onChange={(e) => {
-                setSoprannome(e.target.value)
-                setSalvato(false)
-              }}
+              onChange={(e) => cambia(setSoprannome)(e.target.value)}
               placeholder={io.nome}
               className={INPUT}
             />
@@ -250,13 +265,53 @@ function Prenotazione({ io, onScollegato }: { io: Io; onScollegato: () => void }
               min={1}
               max={99}
               value={maglia}
-              onChange={(e) => {
-                setMaglia(e.target.value)
-                setSalvato(false)
-              }}
+              onChange={(e) => cambia(setMaglia)(e.target.value)}
               className={INPUT}
             />
           </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <label className="flex flex-col gap-1">
+              <span className="label">Piede preferito</span>
+              <select
+                value={piede}
+                onChange={(e) => cambia(setPiede)(e.target.value as Piede | '')}
+                className={INPUT}
+              >
+                <option value="">—</option>
+                {PIEDI.map((p) => (
+                  <option key={p} value={p}>
+                    {PIEDE_ESTESO[p]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="label">Anno di nascita</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={ANNO_NASCITA.min}
+                max={ANNO_NASCITA.max}
+                value={anno}
+                onChange={(e) => cambia(setAnno)(e.target.value)}
+                placeholder="es. 1992"
+                className={INPUT}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="label">Altezza (cm)</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={ALTEZZA_CM.min}
+                max={ALTEZZA_CM.max}
+                value={altezza}
+                onChange={(e) => cambia(setAltezza)(e.target.value)}
+                placeholder="es. 180"
+                className={INPUT}
+              />
+            </label>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <button type="submit" className={BTN_PRIMARIO} disabled={pending}>
               Salva

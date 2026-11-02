@@ -2,6 +2,7 @@
 import type { Payload } from 'payload'
 
 import type { Giocatori, Partite, Squadre } from '@/payload-types'
+import { CATEGORIE_ABILITA, normalizzaAbilita, valoreCategoria, valutazioneGenerale } from '@/lib/abilita'
 import { relId } from '@/lib/relations'
 
 import { etichettaGiocatore } from './abbina'
@@ -34,6 +35,21 @@ export const giocatoreBreve = (g: Giocatori, squadre?: Map<number, Squadre>) => 
     squadraAbituale: squadra ? squadra.nome : squadraId ?? null,
     attivo: g.attivo !== false,
     slug: g.slug ?? null,
+    piedePreferito: g.piedePreferito ?? null,
+    annoNascita: g.annoNascita ?? null,
+    altezza: g.altezza ?? null,
+  }
+}
+
+/** Come giocatoreBreve più descrizione e abilità (con la media per categoria e il generale). */
+export const giocatoreCompleto = (g: Giocatori, squadre?: Map<number, Squadre>) => {
+  const abilita = normalizzaAbilita(g.abilita)
+  return {
+    ...giocatoreBreve(g, squadre),
+    descrizione: g.descrizione ?? null,
+    abilita,
+    valoreCategorie: Object.fromEntries(CATEGORIE_ABILITA.map((c) => [c.chiave, valoreCategoria(abilita, c.chiave)])),
+    valutazioneGenerale: valutazioneGenerale(abilita, g.ruolo),
   }
 }
 

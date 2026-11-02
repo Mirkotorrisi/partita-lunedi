@@ -1,8 +1,36 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 
 import { anyone, authenticated } from '../access'
 import { revalidateHooks } from '../hooks/revalidate'
+import { ABILITA_MAX, ABILITA_MIN, CATEGORIE_ABILITA } from '../lib/abilita'
+import { ALTEZZA_CM, ANNO_NASCITA, PIEDE_ESTESO } from '../lib/format'
 import { slugify } from '../lib/slugify'
+
+const intero = (value: number | null | undefined) =>
+  value === null || value === undefined || Number.isInteger(value) || 'Il numero deve essere intero'
+
+/** Sei gruppi (uno per categoria) con tre numeri da 1 a 99 ciascuno, dal catalogo in lib/abilita. */
+const campiAbilita: Field[] = CATEGORIE_ABILITA.map((c) => ({
+  name: c.chiave,
+  label: c.label,
+  type: 'group',
+  fields: [
+    {
+      type: 'row',
+      fields: c.voci.map(
+        (v): Field => ({
+          name: v.chiave,
+          label: v.label,
+          type: 'number',
+          min: ABILITA_MIN,
+          max: ABILITA_MAX,
+          validate: intero,
+          admin: { width: '33%', step: 1 },
+        }),
+      ),
+    },
+  ],
+}))
 
 export const RUOLI = [
   { label: 'Portiere', value: 'portiere' },
@@ -90,8 +118,7 @@ export const Giocatori: CollectionConfig = {
           type: 'number',
           min: 1,
           max: 99,
-          validate: (value: number | null | undefined) =>
-            value === null || value === undefined || Number.isInteger(value) || 'Il numero deve essere intero',
+          validate: intero,
           admin: { width: '20%', step: 1 },
         },
         {
@@ -111,6 +138,67 @@ export const Giocatori: CollectionConfig = {
       label: 'Foto',
       type: 'upload',
       relationTo: 'media',
+    },
+    {
+      type: 'collapsible',
+      label: 'Dati personali',
+      admin: {
+        initCollapsed: false,
+        description: 'Il giocatore può compilarli da solo dalla sua area nella pagina Prenotazioni.',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'piedePreferito',
+              label: 'Piede preferito',
+              type: 'select',
+              options: Object.entries(PIEDE_ESTESO).map(([value, label]) => ({ label, value })),
+              admin: { width: '34%' },
+            },
+            {
+              name: 'annoNascita',
+              label: 'Anno di nascita',
+              type: 'number',
+              min: ANNO_NASCITA.min,
+              max: ANNO_NASCITA.max,
+              validate: intero,
+              admin: { width: '33%', step: 1 },
+            },
+            {
+              name: 'altezza',
+              label: 'Altezza (cm)',
+              type: 'number',
+              min: ALTEZZA_CM.min,
+              max: ALTEZZA_CM.max,
+              validate: intero,
+              admin: { width: '33%', step: 1 },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'descrizione',
+      label: 'Descrizione',
+      type: 'textarea',
+      admin: {
+        description:
+          'Breve presentazione mostrata nella scheda. Si può formattare in markdown: **grassetto**, *corsivo*, ' +
+          '[testo](https://…), elenchi con "- ".',
+      },
+    },
+    {
+      name: 'abilita',
+      label: 'Abilità',
+      type: 'group',
+      admin: {
+        description:
+          'Da 1 a 99 come nelle card dei videogiochi. Le voci vuote non contano: il valore di ogni categoria ' +
+          'è la media di quelle compilate.',
+      },
+      fields: campiAbilita,
     },
     {
       name: 'nomeCompleto',

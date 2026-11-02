@@ -43,6 +43,9 @@ export default async function PrenotazioniPage() {
       nome: nomeCompleto(g),
       soprannome: g.soprannome,
       numeroMaglia: g.numeroMaglia,
+      piedePreferito: g.piedePreferito,
+      annoNascita: g.annoNascita,
+      altezza: g.altezza,
       anagrafica: { nome: g.nome, cognome: g.cognome, fotoUrl: g.fotoUrl },
     }))
 

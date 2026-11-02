@@ -5,6 +5,7 @@ import * as migration_20261030_095550_add_prossima_partita from './20261030_0955
 import * as migration_20261030_114700_add_push from './20261030_114700_add_push';
 import * as migration_20261030_123736_add_cloud_storage from './20261030_123736_add_cloud_storage';
 import * as migration_20261101_135810_add_comunicazioni from './20261101_135810_add_comunicazioni';
+import * as migration_20261102_111304_add_scheda_giocatore from './20261102_111304_add_scheda_giocatore';
 
 export const migrations = [
   {
@@ -40,6 +41,11 @@ export const migrations = [
   {
     up: migration_20261101_135810_add_comunicazioni.up,
     down: migration_20261101_135810_add_comunicazioni.down,
-    name: '20261101_135810_add_comunicazioni'
+    name: '20261101_135810_add_comunicazioni',
+  },
+  {
+    up: migration_20261102_111304_add_scheda_giocatore.up,
+    down: migration_20261102_111304_add_scheda_giocatore.down,
+    name: '20261102_111304_add_scheda_giocatore'
   },
 ];

@@ -2,6 +2,9 @@
 import { z } from 'zod'
 
 import { RUOLI } from '@/collections/Giocatori'
+import { ABILITA_MAX, ABILITA_MIN, CATEGORIE_ABILITA } from '@/lib/abilita'
+import { ALTEZZA_CM, ANNO_NASCITA, PIEDI } from '@/lib/format'
+import type { Piede } from '@/lib/stats'
 
 export const riferimentoGiocatore = z
   .union([z.number().int(), z.string().min(1)])
@@ -31,6 +34,53 @@ export const ruolo = z
   .describe('Ruolo: portiere, difensore, centrocampista o attaccante')
 
 export const numeroMaglia = z.number().int().min(1).max(99).describe('Numero di maglia da 1 a 99')
+
+export const piede = z
+  .enum(PIEDI as [Piede, ...Piede[]])
+  .describe('Piede preferito: destro, sinistro o ambidestro')
+
+export const annoNascita = z
+  .number()
+  .int()
+  .min(ANNO_NASCITA.min)
+  .max(ANNO_NASCITA.max)
+  .describe('Anno di nascita (es. 1992)')
+
+export const altezza = z
+  .number()
+  .int()
+  .min(ALTEZZA_CM.min)
+  .max(ALTEZZA_CM.max)
+  .describe('Altezza in centimetri')
+
+export const descrizione = z
+  .string()
+  .max(1000)
+  .describe('Breve presentazione mostrata nella scheda; markdown ridotto (grassetto, link, elenchi)')
+
+const valoreAbilita = z.number().int().min(ABILITA_MIN).max(ABILITA_MAX)
+
+/** Oggetto per categoria → voce, generato dal catalogo: { attacco: { finalizzazione: 70 }, … }. */
+export const abilita = z
+  .object(
+    Object.fromEntries(
+      CATEGORIE_ABILITA.map((c) => [
+        c.chiave,
+        z
+          .object(
+            Object.fromEntries(
+              c.voci.map((v) => [v.chiave, valoreAbilita.nullable().optional().describe(v.label)]),
+            ),
+          )
+          .optional()
+          .describe(c.label),
+      ]),
+    ),
+  )
+  .describe(
+    `Abilità da ${ABILITA_MIN} a ${ABILITA_MAX}, per categoria e voce. Solo le voci passate cambiano; null ne cancella una. ` +
+      CATEGORIE_ABILITA.map((c) => `${c.chiave}: ${c.voci.map((v) => v.chiave).join(', ')}`).join('; '),
+  )
 
 export const colore = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Formato #RRGGBB').describe('Colore esadecimale #RRGGBB')
 

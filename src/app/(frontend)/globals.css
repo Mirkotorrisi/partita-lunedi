@@ -133,6 +133,23 @@
     fill: var(--surface-2);
     stroke: none;
   }
+  /* Radar delle abilità */
+  .chart-radar .recharts-polar-grid-concentric-polygon,
+  .chart-radar .recharts-polar-grid-angle line {
+    stroke: var(--border);
+  }
+  .chart-radar .recharts-polar-angle-axis-tick-value {
+    fill: var(--text-muted);
+  }
+  .chart-radar .recharts-radar-polygon {
+    stroke: var(--accent);
+    fill: var(--accent);
+  }
+  .chart-radar .chart-radar-dot {
+    fill: var(--accent);
+    stroke: var(--surface);
+    stroke-width: 1.5;
+  }
   .chart .recharts-surface:focus,
   .chart .recharts-wrapper:focus {
     outline: none;

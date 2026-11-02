@@ -1,4 +1,4 @@
-import type { Esito, Giocatore, Ruolo } from './stats'
+import type { Esito, Giocatore, Piede, Ruolo } from './stats'
 
 const numero = (cifre: number) =>
   new Intl.NumberFormat('it-IT', { minimumFractionDigits: cifre, maximumFractionDigits: cifre })
@@ -46,6 +46,18 @@ export const RUOLO_ESTESO: Record<Ruolo, string> = {
 }
 
 export const ESITO_ESTESO: Record<Esito, string> = { V: 'Vittoria', N: 'Pareggio', P: 'Sconfitta' }
+
+export const PIEDE_ESTESO: Record<Piede, string> = {
+  destro: 'Destro',
+  sinistro: 'Sinistro',
+  ambidestro: 'Ambidestro',
+}
+
+export const PIEDI = Object.keys(PIEDE_ESTESO) as Piede[]
+
+/** Limiti condivisi tra admin, area giocatore e tool MCP. */
+export const ANNO_NASCITA = { min: 1940, max: 2020 } as const
+export const ALTEZZA_CM = { min: 140, max: 220 } as const
 
 // Le date di partita sono giorni di calendario (YYYY-MM-DD): si formattano a mezzogiorno UTC
 // così il fuso del server non può spostarle al giorno prima.

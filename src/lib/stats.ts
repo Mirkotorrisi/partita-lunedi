@@ -3,10 +3,13 @@
  * lavora sul modello normalizzato prodotto da `src/lib/data.ts`.
  */
 
+import type { Abilita } from './abilita'
+
 export type Id = number | string
 export type Lato = 'A' | 'B'
 export type Esito = 'V' | 'N' | 'P'
 export type Ruolo = 'portiere' | 'difensore' | 'centrocampista' | 'attaccante'
+export type Piede = 'destro' | 'sinistro' | 'ambidestro'
 
 export interface Squadra {
   id: Id
@@ -25,6 +28,14 @@ export interface Giocatore {
   attivo: boolean
   squadraAbitualeId: Id | null
   fotoUrl: string | null
+  /** Dati che il giocatore compila da solo (area personale). */
+  piedePreferito: Piede | null
+  annoNascita: number | null
+  /** In centimetri. */
+  altezza: number | null
+  /** A cura dell'admin: presentazione in markdown ridotto e abilità da 1 a 99. */
+  descrizione: string | null
+  abilita: Abilita
 }
 
 export interface Riga {

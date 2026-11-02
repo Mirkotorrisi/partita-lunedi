@@ -6,6 +6,7 @@ import { cookies, headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { getPayload } from 'payload'
 
+import { ALTEZZA_CM, ANNO_NASCITA, PIEDI } from '@/lib/format'
 import {
   COOKIE_DISPOSITIVO,
   DURATA_COOKIE,
@@ -15,6 +16,7 @@ import {
   hashToken,
 } from '@/lib/prenotazioni'
 import { relId } from '@/lib/relations'
+import type { Piede } from '@/lib/stats'
 
 /** `codice: 'dispositivo'` → il cookie non vale più: il client torna alla scelta del giocatore. */
 type Esito = { ok: true } | { ok: false; errore: string; codice?: 'dispositivo' }
@@ -159,8 +161,20 @@ export async function annulla(): Promise<Esito> {
   return { ok: true }
 }
 
-/** Soprannome e numero di maglia: gli unici campi che il giocatore può modificare da solo. */
-export async function aggiornaProfilo(input: { soprannome: string; numeroMaglia: number | null }): Promise<Esito> {
+export interface Profilo {
+  soprannome: string
+  numeroMaglia: number | null
+  piedePreferito: Piede | null
+  annoNascita: number | null
+  /** In centimetri. */
+  altezza: number | null
+}
+
+const interoTra = (n: number | null, min: number, max: number) =>
+  n === null || (Number.isInteger(n) && n >= min && n <= max)
+
+/** I campi che il giocatore può modificare da solo: soprannome, maglia, piede, anno di nascita e altezza. */
+export async function aggiornaProfilo(input: Profilo): Promise<Esito> {
   const dispositivo = await dispositivoCorrente()
   const giocatoreId = dispositivo ? relId(dispositivo.giocatore) : undefined
   if (!dispositivo || typeof giocatoreId !== 'number') return ERRORE_DISPOSITIVO
@@ -169,16 +183,30 @@ export async function aggiornaProfilo(input: { soprannome: string; numeroMaglia:
   if (soprannome.length > SOPRANNOME_MAX) {
     return { ok: false, errore: `Il soprannome può avere al massimo ${SOPRANNOME_MAX} caratteri` }
   }
-  const numero = input.numeroMaglia
-  if (numero !== null && (!Number.isInteger(numero) || numero < 1 || numero > 99)) {
+  if (!interoTra(input.numeroMaglia, 1, 99)) {
     return { ok: false, errore: 'Il numero di maglia deve essere tra 1 e 99' }
+  }
+  if (input.piedePreferito !== null && !PIEDI.includes(input.piedePreferito)) {
+    return { ok: false, errore: 'Piede non valido' }
+  }
+  if (!interoTra(input.annoNascita, ANNO_NASCITA.min, ANNO_NASCITA.max)) {
+    return { ok: false, errore: `L’anno di nascita deve essere tra ${ANNO_NASCITA.min} e ${ANNO_NASCITA.max}` }
+  }
+  if (!interoTra(input.altezza, ALTEZZA_CM.min, ALTEZZA_CM.max)) {
+    return { ok: false, errore: `L’altezza deve essere tra ${ALTEZZA_CM.min} e ${ALTEZZA_CM.max} cm` }
   }
 
   const payload = await getPayload({ config })
   await payload.update({
     collection: 'giocatori',
     id: giocatoreId,
-    data: { soprannome: soprannome || null, numeroMaglia: numero },
+    data: {
+      soprannome: soprannome || null,
+      numeroMaglia: input.numeroMaglia,
+      piedePreferito: input.piedePreferito,
+      annoNascita: input.annoNascita,
+      altezza: input.altezza,
+    },
   })
   await segnaAccesso(dispositivo.id)
   aggiorna()

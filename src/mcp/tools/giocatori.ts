@@ -3,12 +3,23 @@ import type { Payload } from 'payload'
 import { z } from 'zod'
 
 import type { Giocatori } from '@/payload-types'
+import { unisciAbilita, type AbilitaParziale } from '@/lib/abilita'
 
 import { normalizza } from '../abbina'
 import { risolviGiocatore, risolviSquadra, tuttiIGiocatori, tutteLeSquadre } from '../risolvi'
 import { esegui } from '../risposta'
-import { numeroMaglia, riferimentoGiocatore, riferimentoSquadra, ruolo } from '../schemi'
-import { giocatoreBreve } from '../serializza'
+import {
+  abilita,
+  altezza,
+  annoNascita,
+  descrizione,
+  numeroMaglia,
+  piede,
+  riferimentoGiocatore,
+  riferimentoSquadra,
+  ruolo,
+} from '../schemi'
+import { giocatoreBreve, giocatoreCompleto } from '../serializza'
 
 export function registraGiocatori(server: McpServer, payload: Payload) {
   server.registerTool(
@@ -16,8 +27,9 @@ export function registraGiocatori(server: McpServer, payload: Payload) {
     {
       title: 'Elenco giocatori',
       description:
-        'Elenca i giocatori con id, nome completo, soprannome, ruolo, numero di maglia, squadra abituale e stato. ' +
-        'Di default solo gli attivi. Il filtro "cerca" confronta nome, cognome e soprannome.',
+        'Elenca i giocatori con id, nome completo, soprannome, ruolo, numero di maglia, squadra abituale, stato, ' +
+        'piede preferito, anno di nascita e altezza. Di default solo gli attivi. Il filtro "cerca" confronta nome, ' +
+        'cognome e soprannome. Descrizione e abilità si vedono nella risposta di aggiorna_giocatore.',
       inputSchema: {
         cerca: z.string().optional().describe('Testo da cercare in nome, cognome o soprannome'),
         soloAttivi: z.boolean().default(true).describe('false per includere anche i giocatori disattivati'),
@@ -41,13 +53,18 @@ export function registraGiocatori(server: McpServer, payload: Payload) {
     numeroMaglia: numeroMaglia.nullable().optional(),
     squadraAbituale: riferimentoSquadra.nullable().optional().describe('Squadra abituale (solo informativa); null per toglierla'),
     attivo: z.boolean().optional().describe('false esclude il giocatore dalle nuove formazioni'),
+    piedePreferito: piede.nullable().optional(),
+    annoNascita: annoNascita.nullable().optional(),
+    altezza: altezza.nullable().optional(),
+    descrizione: descrizione.nullable().optional().describe('Presentazione per la scheda; null per toglierla'),
+    abilita: abilita.optional(),
   }
 
   const squadraId = async (ref: number | string | null | undefined) =>
     ref === undefined ? undefined : ref === null ? null : (await risolviSquadra(payload, ref)).id
 
   const conSquadra = async (g: Giocatori) =>
-    giocatoreBreve(g, new Map((await tutteLeSquadre(payload)).map((s) => [s.id, s])))
+    giocatoreCompleto(g, new Map((await tutteLeSquadre(payload)).map((s) => [s.id, s])))
 
   server.registerTool(
     'crea_giocatore',
@@ -64,7 +81,7 @@ export function registraGiocatori(server: McpServer, payload: Payload) {
       },
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
-    ({ nome, cognome, ruolo, soprannome, numeroMaglia, squadraAbituale, attivo }) =>
+    ({ nome, cognome, ruolo, soprannome, numeroMaglia, squadraAbituale, attivo, piedePreferito, annoNascita, altezza, descrizione, abilita }) =>
       esegui(async () => {
         const doc = await payload.create({
           collection: 'giocatori',
@@ -76,6 +93,11 @@ export function registraGiocatori(server: McpServer, payload: Payload) {
             numeroMaglia: numeroMaglia ?? null,
             squadraAbituale: await squadraId(squadraAbituale),
             attivo: attivo ?? true,
+            piedePreferito: piedePreferito ?? null,
+            annoNascita: annoNascita ?? null,
+            altezza: altezza ?? null,
+            descrizione: descrizione ?? null,
+            abilita: unisciAbilita(null, abilita as AbilitaParziale),
           },
           depth: 0,
         })
@@ -88,8 +110,9 @@ export function registraGiocatori(server: McpServer, payload: Payload) {
     {
       title: 'Aggiorna giocatore',
       description:
-        'Modifica i dati di un giocatore esistente: solo i campi passati vengono cambiati. ' +
-        'Per disattivarne uno (lascia la partita senza cancellarlo dallo storico) passa attivo=false.',
+        'Modifica i dati di un giocatore esistente: solo i campi passati vengono cambiati (anche nelle abilità). ' +
+        'Per disattivarne uno (lascia la partita senza cancellarlo dallo storico) passa attivo=false. ' +
+        'La risposta include descrizione, abilità, media per categoria e valutazione generale.',
       inputSchema: {
         giocatore: riferimentoGiocatore,
         nome: z.string().min(1).optional(),
@@ -99,7 +122,7 @@ export function registraGiocatori(server: McpServer, payload: Payload) {
       },
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
-    ({ giocatore, nome, cognome, ruolo, soprannome, numeroMaglia, squadraAbituale, attivo }) =>
+    ({ giocatore, nome, cognome, ruolo, soprannome, numeroMaglia, squadraAbituale, attivo, piedePreferito, annoNascita, altezza, descrizione, abilita }) =>
       esegui(async () => {
         const esistente = await risolviGiocatore(payload, giocatore)
         const doc = await payload.update({
@@ -113,6 +136,12 @@ export function registraGiocatori(server: McpServer, payload: Payload) {
             ...(numeroMaglia !== undefined && { numeroMaglia }),
             ...(squadraAbituale !== undefined && { squadraAbituale: await squadraId(squadraAbituale) }),
             ...(attivo !== undefined && { attivo }),
+            ...(piedePreferito !== undefined && { piedePreferito }),
+            ...(annoNascita !== undefined && { annoNascita }),
+            ...(altezza !== undefined && { altezza }),
+            ...(descrizione !== undefined && { descrizione }),
+            // Si uniscono alle abilità già salvate: una voce alla volta, senza azzerare le altre.
+            ...(abilita !== undefined && { abilita: unisciAbilita(esistente.abilita, abilita as AbilitaParziale) }),
           },
           depth: 0,
         })

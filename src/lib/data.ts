@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 
 import type { Giocatori, Media, Partite } from '@/payload-types'
 
+import { normalizzaAbilita } from './abilita'
 import { DATASET_TAG, TUTTE_LE_STAGIONI } from './cache-tags'
 import { relId } from './relations'
 import { elencoStagioni, filtraPartite, type Giocatore, type Id, type Partita, type Riga, type Squadra } from './stats'
@@ -71,6 +72,11 @@ export const getDataset = unstable_cache(
         attivo: g.attivo ?? true,
         squadraAbitualeId: relId(g.squadraAbituale) ?? null,
         fotoUrl: fotoUrl(g.foto),
+        piedePreferito: g.piedePreferito ?? null,
+        annoNascita: g.annoNascita ?? null,
+        altezza: g.altezza ?? null,
+        descrizione: g.descrizione?.trim() || null,
+        abilita: normalizzaAbilita(g.abilita),
       })),
       squadre: squadre.docs.map((s) => ({ id: s.id, nome: s.nome, colore: s.colore })),
     }
