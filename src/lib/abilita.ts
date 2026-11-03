@@ -130,12 +130,43 @@ export function valoreCategoria(a: Abilita, chiave: ChiaveCategoria): number | n
 }
 
 /**
- * Valutazione generale: media delle categorie compilate. Per chi non è portiere la categoria
- * "Portiere" non conta (quasi sempre vuota o bassa, falserebbe il totale).
+ * Peso di ogni categoria nel generale, per ruolo (somma 100). Zero = non conta: un portiere non
+ * viene penalizzato perché attacca male, un attaccante perché non para.
+ */
+export const PESI_RUOLO: Record<Ruolo, Record<ChiaveCategoria, number>> = {
+  portiere: { portiere: 60, difesa: 15, fisico: 15, passaggio: 10, attacco: 0, dribbling: 0 },
+  difensore: { difesa: 40, fisico: 25, passaggio: 15, dribbling: 10, attacco: 10, portiere: 0 },
+  centrocampista: {
+    passaggio: 30,
+    dribbling: 25,
+    difesa: 15,
+    fisico: 15,
+    attacco: 15,
+    portiere: 0,
+  },
+  attaccante: { attacco: 40, dribbling: 25, fisico: 15, passaggio: 10, difesa: 10, portiere: 0 },
+}
+
+/** Categorie che contano per il ruolo, dalla più pesante. */
+export const categorieRilevanti = (ruolo: Ruolo) =>
+  CATEGORIE_ABILITA.filter((c) => PESI_RUOLO[ruolo][c.chiave] > 0).sort(
+    (x, y) => PESI_RUOLO[ruolo][y.chiave] - PESI_RUOLO[ruolo][x.chiave],
+  )
+
+/**
+ * Valutazione generale: media delle categorie pesata per ruolo (PESI_RUOLO). Le categorie non
+ * compilate restano fuori e i pesi si ridistribuiscono su quelle presenti.
  */
 export function valutazioneGenerale(a: Abilita, ruolo: Ruolo): number | null {
-  const categorie = CATEGORIE_ABILITA.filter((c) => ruolo === 'portiere' || c.chiave !== 'portiere')
-  return media(categorie.map((c) => valoreCategoria(a, c.chiave)))
+  let somma = 0
+  let pesi = 0
+  for (const c of categorieRilevanti(ruolo)) {
+    const v = valoreCategoria(a, c.chiave)
+    if (v === null) continue
+    somma += v * PESI_RUOLO[ruolo][c.chiave]
+    pesi += PESI_RUOLO[ruolo][c.chiave]
+  }
+  return pesi ? Math.round(somma / pesi) : null
 }
 
 export const abilitaCompilate = (a: Abilita): boolean =>

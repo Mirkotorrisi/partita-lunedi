@@ -5,6 +5,7 @@ import {
   abilitaVuote,
   fasciaAbilita,
   normalizzaAbilita,
+  PESI_RUOLO,
   unisciAbilita,
   valoreCategoria,
   valutazioneGenerale,
@@ -32,22 +33,40 @@ describe('valoreCategoria', () => {
 })
 
 describe('valutazioneGenerale', () => {
-  const a = normalizzaAbilita({
-    attacco: { finalizzazione: 80 },
-    difesa: { contrasto: 60 },
-    portiere: { riflessi: 20 },
+  it("pesa le categorie per ruolo: un portiere non paga l'attacco scarso", () => {
+    const a = normalizzaAbilita({
+      portiere: { riflessi: 90 },
+      difesa: { contrasto: 70 },
+      fisico: { forza: 70 },
+      passaggio: { visione: 60 },
+      attacco: { finalizzazione: 20 },
+      dribbling: { dribbling: 20 },
+    })
+    // 90·60 + 70·15 + 70·15 + 60·10 = 8100 / 100
+    expect(valutazioneGenerale(a, 'portiere')).toBe(81)
   })
 
-  it('per i giocatori di movimento ignora la categoria Portiere', () => {
-    expect(valutazioneGenerale(a, 'attaccante')).toBe(70)
+  it('per un attaccante la categoria Portiere non conta', () => {
+    const a = normalizzaAbilita({ attacco: { finalizzazione: 80 }, portiere: { riflessi: 10 } })
+    expect(valutazioneGenerale(a, 'attaccante')).toBe(80)
   })
 
-  it('per i portieri la include', () => {
-    expect(valutazioneGenerale(a, 'portiere')).toBe(53)
+  it('ridistribuisce i pesi sulle categorie compilate', () => {
+    const a = normalizzaAbilita({ difesa: { contrasto: 80 }, attacco: { finalizzazione: 40 } })
+    // difensore: difesa 40, attacco 10 → (80·40 + 40·10) / 50
+    expect(valutazioneGenerale(a, 'difensore')).toBe(72)
   })
 
   it('è null senza voci compilate', () => {
     expect(valutazioneGenerale(abilitaVuote(), 'difensore')).toBeNull()
+  })
+})
+
+describe('PESI_RUOLO', () => {
+  it('ogni ruolo somma a 100', () => {
+    for (const pesi of Object.values(PESI_RUOLO)) {
+      expect(Object.values(pesi).reduce((t, p) => t + p, 0)).toBe(100)
+    }
   })
 })
 

@@ -1,8 +1,10 @@
 import { RadarAbilita, type PuntoRadar } from '@/components/charts/RadarAbilita'
 import {
   CATEGORIE_ABILITA,
+  categorieRilevanti,
   COLORE_FASCIA,
   fasciaAbilita,
+  PESI_RUOLO,
   valoreCategoria,
   valutazioneGenerale,
   type Abilita,
@@ -37,8 +39,10 @@ function Valore({ v, grande = false }: { v: number | null; grande?: boolean }) {
  * categoria con le singole voci. Le categorie senza alcuna voce compilata non compaiono.
  */
 export function SchedaAbilita({ abilita, ruolo }: { abilita: Abilita; ruolo: Ruolo }) {
-  // Per chi non è portiere la categoria Portiere non entra né nel generale né nel radar.
-  const rilevanti = CATEGORIE_ABILITA.filter((c) => ruolo === 'portiere' || c.chiave !== 'portiere')
+  // Nel generale e nel radar entrano solo le categorie che pesano per il ruolo (PESI_RUOLO),
+  // nell'ordine del catalogo così la forma del radar è confrontabile tra giocatori.
+  const pesate = new Set(categorieRilevanti(ruolo).map((c) => c.chiave))
+  const rilevanti = CATEGORIE_ABILITA.filter((c) => pesate.has(c.chiave))
   const valori = new Map(
     CATEGORIE_ABILITA.map((c) => [c.chiave, valoreCategoria(abilita, c.chiave)]),
   )
@@ -66,9 +70,15 @@ export function SchedaAbilita({ abilita, ruolo }: { abilita: Abilita; ruolo: Ruo
             <RadarAbilita punti={punti} />
           ) : (
             <p className="text-sm text-muted">
-              Il radar compare quando tutte le categorie sono compilate.
+              Il radar compare quando tutte le categorie del ruolo sono compilate.
             </p>
           )}
+          <p className="text-xs text-muted">
+            Pesato sul ruolo:{' '}
+            {categorieRilevanti(ruolo)
+              .map((c) => `${c.label} ${PESI_RUOLO[ruolo][c.chiave]}%`)
+              .join(' · ')}
+          </p>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:col-span-2">
           {compilate.map((c) => {
