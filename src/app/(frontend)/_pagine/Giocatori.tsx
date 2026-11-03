@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { PlayerList, type VoceGiocatore } from '@/components/giocatori/PlayerList'
+import { valutazioneGenerale } from '@/lib/abilita'
 import { getContesto, TUTTE_LE_STAGIONI } from '@/lib/data'
 import { formatStagione } from '@/lib/format'
 import { statsGiocatore } from '@/lib/stats'
@@ -16,7 +17,14 @@ export async function Giocatori({ stagione }: PropsStagione) {
   // Tutta la rosa, anche chi non ha presenze nel periodo: in tabella resta in grigio.
   const voci: VoceGiocatore[] = ctx.giocatori.map((giocatore) => {
     const s = statsGiocatore(ctx.periodo, giocatore.id)
-    return { giocatore, presenze: s.presenze, gol: s.gol, mediaVoto: s.mediaVoto, percVittorie: s.percVittorie }
+    return {
+      giocatore,
+      presenze: s.presenze,
+      gol: s.gol,
+      mediaVoto: s.mediaVoto,
+      percVittorie: s.percVittorie,
+      generale: valutazioneGenerale(giocatore.abilita, giocatore.ruolo),
+    }
   })
 
   return (

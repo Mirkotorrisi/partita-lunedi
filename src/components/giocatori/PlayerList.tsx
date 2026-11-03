@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { PlayerCell } from '@/components/ui/PlayerCell'
 import { SortableTable, type RigaTabella } from '@/components/ui/SortableTable'
 import { TeamBadge } from '@/components/ui/TeamBadge'
+import { ValoreAbilita } from '@/components/ui/ValoreAbilita'
 import { formatMedia, formatPercentuale, nomeVisualizzato, RUOLO_BREVE, RUOLO_ESTESO } from '@/lib/format'
 import type { Giocatore, Id, Ruolo, Squadra } from '@/lib/stats'
 
@@ -16,6 +17,8 @@ export interface VoceGiocatore {
   gol: number
   mediaVoto: number | null
   percVittorie: number
+  /** Valutazione generale delle abilità (pesata sul ruolo); null se l'admin non le ha compilate. */
+  generale: number | null
 }
 
 const RUOLI = Object.keys(RUOLO_BREVE) as Ruolo[]
@@ -72,7 +75,7 @@ export function PlayerList({ voci, squadre }: { voci: VoceGiocatore[]; squadre: 
 
   const exRosa = voci.filter((v) => !v.giocatore.attivo).length
 
-  const righe: RigaTabella[] = filtrate.map(({ giocatore: g, presenze, gol, mediaVoto, percVittorie }) => {
+  const righe: RigaTabella[] = filtrate.map(({ giocatore: g, presenze, gol, mediaVoto, percVittorie, generale }) => {
     const squadra = g.squadraAbitualeId !== null ? squadre.find((s) => s.id === g.squadraAbitualeId) : undefined
     const assente = presenze === 0
     return {
@@ -88,6 +91,7 @@ export function PlayerList({ voci, squadre }: { voci: VoceGiocatore[]; squadre: 
           display: <span className={`num text-base ${assente ? '' : 'text-text'}`}>{formatMedia(mediaVoto)}</span>,
         },
         vittorie: { sort: assente ? null : percVittorie, display: assente ? '–' : formatPercentuale(percVittorie) },
+        generale: { sort: generale, display: <ValoreAbilita v={generale} /> },
       },
     }
   })
@@ -150,7 +154,7 @@ export function PlayerList({ voci, squadre }: { voci: VoceGiocatore[]; squadre: 
       {righe.length ? (
         <div className="card">
           <SortableTable
-            caption="Giocatori: squadra abituale, presenze, gol, media voto e percentuale di vittorie"
+            caption="Giocatori: squadra abituale, presenze, gol, media voto, percentuale di vittorie e valutazione generale"
             colonne={[
               { key: 'giocatore', label: 'Giocatore', sortable: true, primaDirezione: 'asc' },
               { key: 'squadra', label: 'Squadra', sortable: true, primaDirezione: 'asc', className: 'hidden sm:table-cell' },
@@ -158,6 +162,7 @@ export function PlayerList({ voci, squadre }: { voci: VoceGiocatore[]; squadre: 
               { key: 'gol', label: 'Gol', align: 'right', sortable: true },
               { key: 'media', label: 'MV', title: 'Media voto', align: 'right', sortable: true },
               { key: 'vittorie', label: '%V', title: 'Percentuale di vittorie', align: 'right', sortable: true },
+              { key: 'generale', label: 'OVR', title: 'Valutazione generale delle abilità', align: 'right', sortable: true },
             ]}
             righe={righe}
             ordinamentoIniziale={{ key: 'presenze', direzione: 'desc' }}

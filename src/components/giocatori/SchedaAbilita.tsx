@@ -1,4 +1,5 @@
 import { RadarAbilita, type PuntoRadar } from '@/components/charts/RadarAbilita'
+import { ValoreAbilita } from '@/components/ui/ValoreAbilita'
 import {
   CATEGORIE_ABILITA,
   categorieRilevanti,
@@ -10,29 +11,6 @@ import {
   type Abilita,
 } from '@/lib/abilita'
 import type { Ruolo } from '@/lib/stats'
-
-/** Numero su sfondo colorato per fascia (verde / giallo / rosso); "–" se non assegnato. */
-function Valore({ v, grande = false }: { v: number | null; grande?: boolean }) {
-  const misura = grande ? 'h-8 min-w-10 text-lg' : 'h-6 min-w-8 text-sm'
-  if (v === null) {
-    return (
-      <span
-        className={`num inline-flex ${misura} items-center justify-center text-muted`}
-        aria-label="non assegnato"
-      >
-        –
-      </span>
-    )
-  }
-  return (
-    <span
-      className={`num inline-flex ${misura} items-center justify-center rounded-md px-1.5 text-bg`}
-      style={{ backgroundColor: COLORE_FASCIA[fasciaAbilita(v)] }}
-    >
-      {v}
-    </span>
-  )
-}
 
 /**
  * Abilità del giocatore: valutazione generale col radar delle categorie, poi una card per
@@ -64,7 +42,7 @@ export function SchedaAbilita({ abilita, ruolo }: { abilita: Abilita; ruolo: Ruo
         <div className="card flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
             <span className="label">Generale</span>
-            <Valore v={generale} grande />
+            <ValoreAbilita v={generale} grande />
           </div>
           {punti ? (
             <RadarAbilita punti={punti} />
@@ -87,7 +65,7 @@ export function SchedaAbilita({ abilita, ruolo }: { abilita: Abilita; ruolo: Ruo
             return (
               <div key={c.chiave} className="card flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <Valore v={v} grande />
+                  <ValoreAbilita v={v} grande />
                   <span className="font-semibold">{c.label}</span>
                 </div>
                 <div
@@ -102,7 +80,7 @@ export function SchedaAbilita({ abilita, ruolo }: { abilita: Abilita; ruolo: Ruo
                 <ul className="flex flex-col gap-1.5 text-sm">
                   {c.voci.map((voce) => (
                     <li key={voce.chiave} className="flex items-center gap-2">
-                      <Valore v={voci[voce.chiave]} />
+                      <ValoreAbilita v={voci[voce.chiave]} />
                       <span className="text-muted">{voce.label}</span>
                     </li>
                   ))}
